@@ -45,15 +45,21 @@ const MapView = ({ lat, lng, address, comps }: MapViewProps) => {
   const center: [number, number] = [lat, lng];
 
   return (
-    <div 
-      role="region" 
+    <div
+      role="region"
       aria-label={`Interactive map showing property location at ${address || 'target location'} and ${comps?.length || 0} comparable properties nearby.`}
-      style={{ height: '400px', width: '100%', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e5e7eb' }}
+      style={{
+        height: '400px',
+        width: '100%',
+        borderRadius: '12px',
+        overflow: 'hidden',
+        border: '1px solid #e5e7eb',
+      }}
     >
-      <MapContainer 
-        center={center} 
-        zoom={14} 
-        scrollWheelZoom={false} 
+      <MapContainer
+        center={center}
+        zoom={14}
+        scrollWheelZoom={false}
         style={{ height: '100%', width: '100%' }}
       >
         <TileLayer
@@ -61,29 +67,31 @@ const MapView = ({ lat, lng, address, comps }: MapViewProps) => {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <ChangeView center={center} />
-        
+
         <Marker position={center}>
           <Popup>
-            <strong>Target Property</strong><br />
+            <strong>Target Property</strong>
+            <br />
             {address || 'Target Location'}
           </Popup>
         </Marker>
 
-        {comps?.map(comp => (
-          <Marker 
-            key={comp.id} 
+        {comps?.map((comp) => (
+          <Marker
+            key={comp.id}
             position={[comp.lat, comp.lng]}
             icon={L.divIcon({
               className: 'custom-div-icon',
-              html: `<div style="background-color: ${colors.success}; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; border: 2px solid white; white-space: nowrap;">₹${(comp.price / 100000).toFixed(1)}L</div>`,
+              html: `<div style="background-color: ${colors.success[500]}; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; border: 2px solid white; white-space: nowrap;">₹${(comp.price / 100000).toFixed(1)}L</div>`,
               iconSize: [40, 20],
-              iconAnchor: [20, 10]
+              iconAnchor: [20, 10],
             })}
           >
             <Popup>
-              <strong>Comparable</strong><br />
-              {comp.address}<br />
-              ₹{comp.price.toLocaleString()}
+              <strong>Comparable</strong>
+              <br />
+              {comp.address}
+              <br />₹{comp.price.toLocaleString()}
             </Popup>
           </Marker>
         ))}

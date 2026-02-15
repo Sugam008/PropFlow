@@ -1,32 +1,29 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { spacing, typography, colors, borderRadius, shadow, layout } from '@propflow/theme';
-import { useMediaQuery } from '../src/hooks/useMediaQuery';
-import { Badge } from '../src/components/Badge';
-import { Card } from '../src/components/Card';
+import React, { useState } from 'react';
+import { spacing, typography, colors, borderRadius, layout } from '@propflow/theme';
+import { useMediaQuery } from '../../src/hooks/useMediaQuery';
+import { Badge } from '../../src/components/Badge';
+import { Card } from '../../src/components/Card';
 import {
   Clock,
   MapPin,
   ChevronRight,
   Search,
   Loader2,
-  Keyboard,
-  HelpCircle,
-  Building2,
-  FileCheck,
+  CheckCircle2,
+  Calendar,
   TrendingUp,
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { propertyApi, Property } from '../src/api/properties';
-import { getErrorMessage } from '../src/api/errors';
-import { useToast } from '../src/providers/ToastProvider';
+import { propertyApi, Property } from '../../src/api/properties';
+import { getErrorMessage } from '../../src/api/errors';
+import { useToast } from '../../src/providers/ToastProvider';
 import { motion } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { useAuthStore } from '../src/store/useAuthStore';
 
-const Table = dynamic(() => import('../src/components/Table').then((mod) => mod.Table), {
+const Table = dynamic(() => import('../../src/components/Table').then((mod) => mod.Table), {
   loading: () => (
     <div style={{ padding: spacing[10], textAlign: 'center' }}>
       <Loader2 className="animate-spin" style={{ color: colors.primary[500] }} />
@@ -35,17 +32,11 @@ const Table = dynamic(() => import('../src/components/Table').then((mod) => mod.
   ssr: false,
 });
 
-const Modal = dynamic(() => import('../src/components/Modal').then((mod) => mod.Modal), {
-  ssr: false,
-});
-
-export default function Home() {
+export default function CompletedPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [showHelp, setShowHelp] = useState(false);
   const router = useRouter();
   const { showToast } = useToast();
-  const { isAuthenticated } = useAuthStore();
 
   const isMobile = useMediaQuery('(max-width: 768px)');
   const isTablet = useMediaQuery('(max-width: 1024px)');
@@ -59,56 +50,14 @@ export default function Home() {
     queryFn: () => propertyApi.getProperties(),
   });
 
-  useEffect(() => {
-    if (error) {
-      showToast(getErrorMessage(error), 'error');
-    }
-  }, [error, showToast]);
+  const completedProperties = properties?.filter((p) => p.status === 'VALUED') || [];
 
-  const filteredData = React.useMemo(
-    () =>
-      properties?.filter(
-        (item) =>
-          item.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.city.toLowerCase().includes(searchTerm.toLowerCase()),
-      ) || [],
-    [properties, searchTerm],
+  const filteredData = completedProperties.filter(
+    (item) =>
+      item.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.city.toLowerCase().includes(searchTerm.toLowerCase()),
   );
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (document.activeElement?.tagName === 'INPUT') return;
-
-      if (e.key.toLowerCase() === 'j') {
-        setSelectedId((prev) => {
-          if (!prev && filteredData.length > 0) return filteredData[0].id;
-          const currentIndex = filteredData.findIndex((item) => item.id === prev);
-          if (currentIndex < filteredData.length - 1) return filteredData[currentIndex + 1].id;
-          return prev;
-        });
-      } else if (e.key.toLowerCase() === 'k') {
-        setSelectedId((prev) => {
-          if (!prev && filteredData.length > 0) return filteredData[0].id;
-          const currentIndex = filteredData.findIndex((item) => item.id === prev);
-          if (currentIndex > 0) return filteredData[currentIndex - 1].id;
-          return prev;
-        });
-      } else if (e.key === 'Enter' && selectedId) {
-        router.push(`/${selectedId}`);
-      } else if (e.key === '?') {
-        setShowHelp(true);
-      } else if (e.key >= '1' && e.key <= '9') {
-        const index = parseInt(e.key) - 1;
-        if (index < filteredData.length) {
-          setSelectedId(filteredData[index].id);
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [filteredData, selectedId, router]);
 
   const columns = React.useMemo(
     () => [
@@ -153,23 +102,11 @@ export default function Home() {
       {
         header: 'Status',
         key: 'status',
-        render: (item: Property) => {
-          const variant =
-            item.status === 'SUBMITTED'
-              ? 'info'
-              : item.status === 'VALUED'
-                ? 'success'
-                : item.status === 'REJECTED'
-                  ? 'error'
-                  : item.status === 'FOLLOW_UP'
-                    ? 'warning'
-                    : 'gray';
-          return <Badge variant={variant}>{item.status}</Badge>;
-        },
+        render: () => <Badge variant="success">VALUED</Badge>,
       },
       {
-        header: 'Submitted Date',
-        key: 'created_at',
+        header: 'Valuation Date',
+        key: 'updated_at',
         render: (item: Property) => (
           <div
             style={{
@@ -180,7 +117,8 @@ export default function Home() {
               fontSize: typography.fontSizes.sm,
             }}
           >
-            <Clock size={14} /> {new Date(item.created_at).toLocaleDateString()}
+            <CheckCircle2 size={14} />{' '}
+            {item.updated_at ? new Date(item.updated_at).toLocaleDateString() : 'N/A'}
           </div>
         ),
       },
@@ -207,25 +145,32 @@ export default function Home() {
 
   const stats = [
     {
-      label: 'Total Assigned',
-      value: properties?.length || 0,
-      icon: Building2,
-      color: colors.gray[900],
-      bgColor: colors.gray[100],
+      label: 'Total Completed',
+      value: completedProperties.length,
+      icon: CheckCircle2,
+      color: colors.success[600],
+      bgColor: colors.success[50],
     },
     {
-      label: 'Pending Review',
-      value: properties?.filter((p) => p.status === 'SUBMITTED').length || 0,
-      icon: Clock,
+      label: 'This Month',
+      value: completedProperties.filter(
+        (p) => p.updated_at && new Date(p.updated_at).getMonth() === new Date().getMonth(),
+      ).length,
+      icon: Calendar,
       color: colors.primary[600],
       bgColor: colors.primary[50],
     },
     {
-      label: 'Completed',
-      value: properties?.filter((p) => p.status === 'VALUED').length || 0,
-      icon: FileCheck,
-      color: colors.success[600],
-      bgColor: colors.success[50],
+      label: 'Avg. Value',
+      value: completedProperties.length
+        ? `₹${(
+            completedProperties.reduce((sum, p) => sum + (p.estimated_value || 0), 0) /
+            completedProperties.length
+          ).toLocaleString(undefined, { maximumFractionDigits: 0 })}`
+        : '₹0',
+      icon: TrendingUp,
+      color: colors.gray[900],
+      bgColor: colors.gray[100],
     },
   ];
 
@@ -262,7 +207,7 @@ export default function Home() {
               letterSpacing: typography.letterSpacing.tight,
             }}
           >
-            Welcome back
+            Completed Valuations
           </h1>
           <p
             style={{
@@ -271,34 +216,9 @@ export default function Home() {
               lineHeight: typography.lineHeights.relaxed,
             }}
           >
-            {properties?.length || 0} properties in your queue
+            {completedProperties.length} properties have been valued
           </p>
         </motion.div>
-        <motion.button
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          whileHover={{ scale: 1.02, backgroundColor: colors.gray[50] }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => setShowHelp(true)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: spacing[2],
-            padding: `${spacing[2]}px ${spacing[4]}px`,
-            borderRadius: borderRadius.lg,
-            border: `1px solid ${colors.border}`,
-            backgroundColor: colors.white,
-            color: colors.gray[600],
-            cursor: 'pointer',
-            fontSize: typography.fontSizes.sm,
-            fontWeight: typography.fontWeights.medium,
-            boxShadow: shadow.xs,
-          }}
-        >
-          <Keyboard size={16} />
-          Shortcuts
-        </motion.button>
       </div>
 
       {isLoading ? (
@@ -312,7 +232,7 @@ export default function Home() {
             gap: spacing[6],
           }}
           role="status"
-          aria-label="Loading properties"
+          aria-label="Loading completed properties"
         >
           <div style={{ position: 'relative', width: 64, height: 64 }}>
             <div
@@ -335,7 +255,7 @@ export default function Home() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: shadow.brand,
+                boxShadow: '0 0 20px rgba(227, 30, 36, 0.4)',
               }}
             >
               <div
@@ -359,10 +279,10 @@ export default function Home() {
                 marginBottom: spacing[1],
               }}
             >
-              Loading Queue
+              Loading Completed
             </div>
             <div style={{ fontSize: typography.fontSizes.sm, color: colors.gray[500] }}>
-              Fetching your properties...
+              Fetching valued properties...
             </div>
           </div>
         </div>
@@ -383,60 +303,39 @@ export default function Home() {
               fontWeight: typography.fontWeights.medium,
             }}
           >
-            Failed to load properties
+            Failed to load completed properties
           </div>
           <div style={{ color: colors.error[500], fontSize: typography.fontSizes.sm }}>
             Please refresh the page or try again later
           </div>
         </div>
-      ) : (
-        <>
+      ) : completedProperties.length === 0 ? (
+        <div
+          style={{
+            padding: spacing[12],
+            textAlign: 'center',
+            backgroundColor: colors.gray[50],
+            borderRadius: borderRadius.xl,
+            border: `1px solid ${colors.gray[200]}`,
+          }}
+        >
+          <CheckCircle2 size={64} style={{ color: colors.gray[300], marginBottom: spacing[4] }} />
           <div
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: spacing[3],
-              backgroundColor: colors.white,
-              padding: `${spacing[3]}px ${spacing[4]}px`,
-              borderRadius: borderRadius.lg,
-              border: `1px solid ${colors.border}`,
-              marginBottom: spacing[8],
-              transition: 'border-color 0.2s, box-shadow 0.2s',
+              fontSize: typography.fontSizes.xl,
+              fontWeight: typography.fontWeights.semibold,
+              color: colors.gray[700],
+              marginBottom: spacing[2],
             }}
           >
-            <Search size={20} color={colors.gray[400]} />
-            <input
-              type="text"
-              placeholder="Search by ID or address..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                backgroundColor: 'transparent',
-                border: 'none',
-                outline: 'none',
-                fontSize: typography.fontSizes.base,
-                width: '100%',
-                color: colors.gray[900],
-              }}
-            />
-            {searchTerm && (
-              <button
-                onClick={() => setSearchTerm('')}
-                style={{
-                  background: colors.gray[100],
-                  border: 'none',
-                  borderRadius: borderRadius.base,
-                  padding: `${spacing[1]}px ${spacing[2]}px`,
-                  cursor: 'pointer',
-                  fontSize: typography.fontSizes.xs,
-                  color: colors.gray[500],
-                }}
-              >
-                Clear
-              </button>
-            )}
+            No Completed Valuations Yet
           </div>
-
+          <div style={{ color: colors.gray[500], fontSize: typography.fontSizes.base }}>
+            Properties you complete will appear here
+          </div>
+        </div>
+      ) : (
+        <>
           <motion.div
             initial="hidden"
             animate="visible"
@@ -459,7 +358,7 @@ export default function Home() {
               marginBottom: spacing[8],
             }}
           >
-            {stats.map((stat, index) => {
+            {stats.map((stat) => {
               const Icon = stat.icon;
               return (
                 <motion.div
@@ -516,6 +415,52 @@ export default function Home() {
             })}
           </motion.div>
 
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: spacing[3],
+              backgroundColor: colors.white,
+              padding: `${spacing[3]}px ${spacing[4]}px`,
+              borderRadius: borderRadius.lg,
+              border: `1px solid ${colors.border}`,
+              marginBottom: spacing[8],
+              transition: 'border-color 0.2s, box-shadow 0.2s',
+            }}
+          >
+            <Search size={20} color={colors.gray[400]} />
+            <input
+              type="text"
+              placeholder="Search by ID or address..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                backgroundColor: 'transparent',
+                border: 'none',
+                outline: 'none',
+                fontSize: typography.fontSizes.base,
+                width: '100%',
+                color: colors.gray[900],
+              }}
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                style={{
+                  background: colors.gray[100],
+                  border: 'none',
+                  borderRadius: borderRadius.base,
+                  padding: `${spacing[1]}px ${spacing[2]}px`,
+                  cursor: 'pointer',
+                  fontSize: typography.fontSizes.xs,
+                  color: colors.gray[500],
+                }}
+              >
+                Clear
+              </button>
+            )}
+          </div>
+
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -539,7 +484,7 @@ export default function Home() {
                     margin: 0,
                   }}
                 >
-                  Current Queue
+                  Valued Properties
                 </h2>
                 <span
                   style={{
@@ -560,73 +505,6 @@ export default function Home() {
           </motion.div>
         </>
       )}
-
-      <Modal isOpen={showHelp} onClose={() => setShowHelp(false)} title="Keyboard Shortcuts">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: spacing[4] }}>
-          {[
-            { key: 'J', desc: 'Move selection down' },
-            { key: 'K', desc: 'Move selection up' },
-            { key: 'Enter', desc: 'Open selected property' },
-            { key: '1-9', desc: 'Jump to item by number' },
-            { key: '?', desc: 'Show this help menu' },
-          ].map((shortcut) => (
-            <div
-              key={shortcut.key}
-              style={{ display: 'flex', alignItems: 'center', gap: spacing[4] }}
-            >
-              <kbd
-                style={{
-                  backgroundColor: colors.gray[100],
-                  padding: `${spacing[2]}px ${spacing[3]}px`,
-                  borderRadius: borderRadius.md,
-                  fontFamily: typography.fonts.mono,
-                  fontWeight: typography.fontWeights.semibold,
-                  minWidth: 48,
-                  textAlign: 'center',
-                  border: `1px solid ${colors.border}`,
-                  boxShadow: `0 2px 0 ${colors.gray[200]}`,
-                  fontSize: typography.fontSizes.sm,
-                }}
-              >
-                {shortcut.key}
-              </kbd>
-              <div style={{ color: colors.gray[600], fontSize: typography.fontSizes.sm }}>
-                {shortcut.desc}
-              </div>
-            </div>
-          ))}
-        </div>
-      </Modal>
-
-      <motion.button
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.5 }}
-        whileHover={{ scale: 1.1, rotate: 5 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={() => setShowHelp(true)}
-        aria-label="Keyboard Shortcuts"
-        title="Keyboard Shortcuts (?)"
-        style={{
-          position: 'fixed',
-          bottom: spacing[6],
-          right: spacing[6],
-          backgroundColor: colors.white,
-          border: `1px solid ${colors.border}`,
-          borderRadius: '50%',
-          width: 52,
-          height: 52,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: shadow.md,
-          cursor: 'pointer',
-          color: colors.gray[500],
-          zIndex: 50,
-        }}
-      >
-        <HelpCircle size={24} aria-hidden="true" />
-      </motion.button>
     </div>
   );
 }

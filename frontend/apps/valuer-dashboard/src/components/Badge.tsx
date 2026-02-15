@@ -1,5 +1,5 @@
 import React from 'react';
-import { colors, spacing, typography } from '@propflow/theme';
+import { colors, spacing, typography, borderRadius } from '@propflow/theme';
 
 interface BadgeProps {
   children: React.ReactNode;
@@ -10,13 +10,13 @@ export const Badge = ({ children, variant = 'gray' }: BadgeProps) => {
   const getStyles = () => {
     switch (variant) {
       case 'success':
-        return { backgroundColor: '#ecfdf5', color: colors.success };
+        return { backgroundColor: colors.success[50], color: colors.success[600] };
       case 'warning':
-        return { backgroundColor: '#fffbeb', color: colors.warning };
+        return { backgroundColor: colors.warning[50], color: colors.warning[600] };
       case 'error':
-        return { backgroundColor: '#fef2f2', color: colors.error };
+        return { backgroundColor: colors.error[50], color: colors.error[600] };
       case 'info':
-        return { backgroundColor: colors.primary[50], color: colors.primary[700] };
+        return { backgroundColor: colors.info[50], color: colors.info[600] };
       default:
         return { backgroundColor: colors.gray[100], color: colors.gray[600] };
     }
@@ -25,17 +25,20 @@ export const Badge = ({ children, variant = 'gray' }: BadgeProps) => {
   const { backgroundColor, color } = getStyles();
 
   return (
-    <span style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      padding: `${spacing[1]}px ${spacing[3]}px`,
-      borderRadius: 9999,
-      fontSize: typography.fontSizes.xs,
-      fontWeight: typography.fontWeights.medium,
-      backgroundColor,
-      color,
-      whiteSpace: 'nowrap'
-    }}>
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        padding: `${spacing[1]}px ${spacing[3]}px`,
+        borderRadius: borderRadius.full,
+        fontSize: typography.fontSizes.xs,
+        fontWeight: typography.fontWeights.medium,
+        backgroundColor,
+        color,
+        whiteSpace: 'nowrap',
+        letterSpacing: typography.letterSpacing.wide,
+      }}
+    >
       {children}
     </span>
   );

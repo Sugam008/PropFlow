@@ -2,15 +2,15 @@ import { colors } from '@propflow/theme';
 import * as Haptics from 'expo-haptics';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-    ActivityIndicator,
-    KeyboardAvoidingView,
-    Platform,
-    SafeAreaView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { authApi } from '../../api/auth';
 import { getErrorMessage } from '../../api/errors';
@@ -61,7 +61,7 @@ export const OTPScreen = ({ navigation, route }: RootStackScreenProps<'OTP'>) =>
     }
 
     // Auto-submit if all digits entered
-    if (newOtp.every(digit => digit !== '') && index === 5) {
+    if (newOtp.every((digit) => digit !== '') && index === 5) {
       handleVerify(newOtp.join(''));
     }
   };
@@ -97,7 +97,7 @@ export const OTPScreen = ({ navigation, route }: RootStackScreenProps<'OTP'>) =>
           role: response.user.role,
           is_active: response.user.is_active,
         },
-        response.access_token
+        response.access_token,
       );
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (err) {
@@ -134,11 +134,11 @@ export const OTPScreen = ({ navigation, route }: RootStackScreenProps<'OTP'>) =>
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
           accessibilityLabel="Go back"
@@ -153,7 +153,7 @@ export const OTPScreen = ({ navigation, route }: RootStackScreenProps<'OTP'>) =>
             Enter the 6-digit code sent to {phone || 'your phone'}
           </Text>
           {error ? (
-            <Text 
+            <Text
               style={styles.errorText}
               accessibilityRole="alert"
               accessibilityLiveRegion="assertive"
@@ -183,13 +183,15 @@ export const OTPScreen = ({ navigation, route }: RootStackScreenProps<'OTP'>) =>
             ))}
           </View>
 
-          <TouchableOpacity 
-            style={[styles.button, otp.some(d => d === '') && styles.buttonDisabled]} 
+          <TouchableOpacity
+            style={[styles.button, otp.some((d) => d === '') && styles.buttonDisabled]}
             onPress={() => handleVerify(otp.join(''))}
-            disabled={otp.some(d => d === '') || isVerifying || isResending}
+            disabled={otp.some((d) => d === '') || isVerifying || isResending}
             accessibilityRole="button"
             accessibilityLabel="Verify OTP"
-            accessibilityState={{ disabled: otp.some(d => d === '') || isVerifying || isResending }}
+            accessibilityState={{
+              disabled: otp.some((d) => d === '') || isVerifying || isResending,
+            }}
           >
             {isVerifying ? (
               <ActivityIndicator color={colors.white} />
@@ -223,9 +225,9 @@ export const OTPScreen = ({ navigation, route }: RootStackScreenProps<'OTP'>) =>
 };
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: colors.white 
+  container: {
+    flex: 1,
+    backgroundColor: colors.white,
   },
   keyboardView: {
     flex: 1,
@@ -243,20 +245,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 20,
   },
-  title: { 
-    fontSize: 32, 
-    fontWeight: 'bold', 
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
     color: colors.black,
     marginBottom: 12,
   },
-  subtitle: { 
-    fontSize: 16, 
-    color: colors.gray[500], 
+  subtitle: {
+    fontSize: 16,
+    color: colors.gray[500],
     lineHeight: 24,
     marginBottom: 16,
   },
   errorText: {
-    color: colors.error,
+    color: colors.error[500],
     marginBottom: 20,
     fontSize: 13,
   },
@@ -276,8 +278,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: colors.primary[500],
   },
-  button: { 
-    backgroundColor: colors.primary[500], 
+  button: {
+    backgroundColor: colors.primary[500],
     height: 56,
     borderRadius: 16,
     justifyContent: 'center',
@@ -293,9 +295,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0,
     elevation: 0,
   },
-  buttonText: { 
-    color: colors.white, 
-    fontSize: 18, 
+  buttonText: {
+    color: colors.white,
+    fontSize: 18,
     fontWeight: 'bold',
     letterSpacing: 1,
   },

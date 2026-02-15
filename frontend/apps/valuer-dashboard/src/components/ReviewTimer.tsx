@@ -39,9 +39,9 @@ export const ReviewTimer: React.FC<ReviewTimerProps> = ({
   }, []);
 
   const getColor = useCallback((seconds: number): string => {
-    if (seconds < 300) return colors.success; // < 5 min - good
-    if (seconds < 600) return colors.warning; // < 10 min - warning
-    return colors.error; // > 10 min - slow
+    if (seconds < 300) return colors.success[500]; // < 5 min - good
+    if (seconds < 600) return colors.warning[500]; // < 10 min - warning
+    return colors.error[500]; // > 10 min - slow
   }, []);
 
   return (

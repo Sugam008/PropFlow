@@ -29,12 +29,12 @@ async def add_security_headers(request: Request, call_next):
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-XSS-Protection"] = "1; mode=block"
-    response.headers[
-        "Strict-Transport-Security"
-    ] = "max-age=31536000; includeSubDomains"
-    response.headers[
-        "Content-Security-Policy"
-    ] = "default-src 'self'; frame-ancestors 'none';"
+    response.headers["Strict-Transport-Security"] = (
+        "max-age=31536000; includeSubDomains"
+    )
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; frame-ancestors 'none';"
+    )
     return response
 
 
@@ -53,15 +53,15 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 
-# Set all CORS enabled origins
-if settings.BACKEND_CORS_ORIGINS:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+# Set all CORS enabled origins - allow all for development
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 app.add_middleware(LoggingMiddleware)
 

@@ -35,15 +35,17 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div style={{
-        position: 'fixed',
-        bottom: '2rem',
-        right: '2rem',
-        zIndex: 9999,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.5rem',
-      }}>
+      <div
+        style={{
+          position: 'fixed',
+          bottom: '2rem',
+          right: '2rem',
+          zIndex: 9999,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.5rem',
+        }}
+      >
         {toasts.map((toast) => (
           <div
             key={toast.id}
@@ -51,9 +53,14 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
             style={{
               padding: '1rem 1.5rem',
               borderRadius: '0.5rem',
-              backgroundColor: toast.type === 'error' ? colors.error : 
-                               toast.type === 'success' ? '#10b981' :
-                               toast.type === 'warning' ? '#f59e0b' : '#3b82f6',
+              backgroundColor:
+                toast.type === 'error'
+                  ? colors.error[500]
+                  : toast.type === 'success'
+                    ? colors.success[500]
+                    : toast.type === 'warning'
+                      ? colors.warning[500]
+                      : colors.info[500],
               color: 'white',
               boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
               cursor: 'pointer',
@@ -68,8 +75,14 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
       </div>
       <style jsx global>{`
         @keyframes slideIn {
-          from { transform: translateX(100%); opacity: 0; }
-          to { transform: translateX(0); opacity: 1; }
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
         }
       `}</style>
     </ToastContext.Provider>

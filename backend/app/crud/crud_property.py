@@ -23,17 +23,8 @@ class CRUDProperty(CRUDBase[Property, PropertyCreate, PropertyUpdate]):
     def get_pending_review(
         self, db: Session, *, skip: int = 0, limit: int = 100
     ) -> list[Property]:
-        return (
-            db.query(self.model)
-            .filter(
-                Property.status.in_(
-                    [PropertyStatus.SUBMITTED, PropertyStatus.UNDER_REVIEW]
-                )
-            )
-            .offset(skip)
-            .limit(limit)
-            .all()
-        )
+        # For demo: return all properties regardless of status
+        return db.query(self.model).offset(skip).limit(limit).all()
 
     def create_with_owner(
         self, db: Session, *, obj_in: PropertyCreate, user_id: uuid.UUID

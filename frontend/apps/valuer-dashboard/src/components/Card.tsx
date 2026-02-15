@@ -1,5 +1,5 @@
 import React from 'react';
-import { colors, spacing, typography } from '@propflow/theme';
+import { colors, spacing, typography, borderRadius, shadow } from '@propflow/theme';
 
 interface CardProps {
   title?: string;
@@ -10,39 +10,47 @@ interface CardProps {
 
 export const Card = ({ title, children, footer, style }: CardProps) => {
   return (
-    <div style={{
-      backgroundColor: colors.white,
-      borderRadius: 12,
-      border: `1px solid ${colors.border}`,
-      boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-      display: 'flex',
-      flexDirection: 'column',
-      overflow: 'hidden',
-      ...style
-    }}>
+    <div
+      style={
+        {
+          backgroundColor: colors.white,
+          borderRadius: borderRadius.xl,
+          border: `1px solid ${colors.border}`,
+          boxShadow: shadow.sm,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+          transition: 'box-shadow 0.2s ease',
+          ...style,
+        } as React.CSSProperties
+      }
+    >
       {title && (
-        <h2 style={{
-          padding: `${spacing[4]}px ${spacing[6]}px`,
-          borderBottom: `1px solid ${colors.border}`,
-          fontSize: typography.fontSizes.base,
-          fontWeight: typography.fontWeights.semibold,
-          color: colors.gray[900],
-          margin: 0
-        }}>
+        <h2
+          style={{
+            padding: `${spacing[4]}px ${spacing[5]}px`,
+            borderBottom: `1px solid ${colors.border}`,
+            fontSize: typography.fontSizes.base,
+            fontWeight: typography.fontWeights.semibold,
+            color: colors.gray[900],
+            margin: 0,
+            letterSpacing: typography.letterSpacing.tight,
+          }}
+        >
           {title}
         </h2>
       )}
-      
-      <div style={{ padding: `${spacing[6]}px`, flex: 1 }}>
-        {children}
-      </div>
-      
+
+      <div style={{ flex: 1 }}>{children}</div>
+
       {footer && (
-        <div style={{
-          padding: `${spacing[4]}px ${spacing[6]}px`,
-          backgroundColor: colors.gray[50],
-          borderTop: `1px solid ${colors.border}`
-        }}>
+        <div
+          style={{
+            padding: `${spacing[3]}px ${spacing[5]}px`,
+            backgroundColor: colors.gray[50],
+            borderTop: `1px solid ${colors.border}`,
+          }}
+        >
           {footer}
         </div>
       )}

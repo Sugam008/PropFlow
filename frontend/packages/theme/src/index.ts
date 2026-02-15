@@ -5,16 +5,15 @@
  */
 
 export const colors = {
-  // Brand Colors - ABC Red (Aditya Birla Capital)
   primary: {
     50: '#FFF5F5',
     100: '#FFE5E5',
     200: '#FFCCCC',
     300: '#FFB3B3',
     400: '#FF9999',
-    500: '#E31E24', // Main brand color - ABC Red
-    600: '#B81B20', // Hover/active states
-    700: '#8B0000', // Deep accents
+    500: '#E31E24',
+    600: '#B81B20',
+    700: '#8B0000',
     800: '#5C0000',
     900: '#2E0000',
     950: '#1A0000',
@@ -32,20 +31,58 @@ export const colors = {
     900: '#111827',
     950: '#0A0A0A',
   },
-
-  // Status Colors - WCAG AA compliant
-  success: '#047857',
-  successLight: '#D1FAE5',
-  warning: '#B45309',
-  warningLight: '#FEF3C7',
-  error: '#B91C1C',
-  errorLight: '#FEE2E2',
-  info: '#1D4ED8',
-  infoLight: '#DBEAFE',
-
-  // Neutrals
-  white: '#FFFFFF',
-  black: '#000000',
+  success: {
+    50: '#ECFDF5',
+    100: '#D1FAE5',
+    200: '#A7F3D0',
+    300: '#6EE7B7',
+    400: '#34D399',
+    500: '#047857',
+    600: '#059669',
+    700: '#047857',
+    800: '#065F46',
+    900: '#064E3B',
+    950: '#022C22',
+  },
+  warning: {
+    50: '#FFFBEB',
+    100: '#FEF3C7',
+    200: '#FDE68A',
+    300: '#FCD34D',
+    400: '#FBBF24',
+    500: '#B45309',
+    600: '#D97706',
+    700: '#B45309',
+    800: '#92400E',
+    900: '#78350F',
+    950: '#451A03',
+  },
+  error: {
+    50: '#FEF2F2',
+    100: '#FEE2E2',
+    200: '#FECACA',
+    300: '#FCA5A5',
+    400: '#F87171',
+    500: '#B91C1C',
+    600: '#DC2626',
+    700: '#B91C1C',
+    800: '#991B1B',
+    900: '#7F1D1D',
+    950: '#450A0A',
+  },
+  info: {
+    50: '#EFF6FF',
+    100: '#DBEAFE',
+    200: '#BFDBFE',
+    300: '#93C5FD',
+    400: '#60A5FA',
+    500: '#1D4ED8',
+    600: '#2563EB',
+    700: '#1D4ED8',
+    800: '#1E40AF',
+    900: '#1E3A8A',
+    950: '#172554',
+  },
   gray: {
     50: '#F9FAFB',
     100: '#F3F4F6',
@@ -59,8 +96,8 @@ export const colors = {
     900: '#111827',
     950: '#030712',
   },
-
-  // Semantic
+  white: '#FFFFFF',
+  black: '#000000',
   background: '#FFFFFF',
   foreground: '#111827',
   muted: '#F3F4F6',
@@ -69,23 +106,47 @@ export const colors = {
   borderFocused: '#E31E24',
   input: '#FFFFFF',
   ring: '#E31E24',
+  successLight: '#D1FAE5',
+  warningLight: '#FEF3C7',
+  errorLight: '#FEE2E2',
+  infoLight: '#DBEAFE',
 };
 
 export const spacing = {
   0: 0,
+  0.5: 2,
   1: 4,
+  1.5: 6,
   2: 8,
+  2.5: 10,
   3: 12,
+  3.5: 14,
   4: 16,
   5: 20,
   6: 24,
+  7: 28,
   8: 32,
+  9: 36,
   10: 40,
+  11: 44,
   12: 48,
+  14: 56,
   16: 64,
   20: 80,
   24: 96,
+  28: 112,
   32: 128,
+  36: 144,
+  40: 160,
+  44: 176,
+  48: 192,
+  52: 208,
+  56: 224,
+  60: 240,
+  64: 256,
+  72: 288,
+  80: 320,
+  96: 384,
 };
 
 export const typography = {
@@ -94,6 +155,7 @@ export const typography = {
     mono: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
   },
   fontSizes: {
+    '2xs': 10,
     xs: 12,
     sm: 14,
     base: 16,
@@ -103,14 +165,20 @@ export const typography = {
     '3xl': 30,
     '4xl': 36,
     '5xl': 48,
+    '6xl': 60,
+    '7xl': 72,
+    '8xl': 96,
+    '9xl': 128,
   },
   fontWeights: {
     thin: '100',
+    extralight: '200',
     light: '300',
     normal: '400',
     medium: '500',
     semibold: '600',
     bold: '700',
+    extrabold: '800',
     black: '900',
   },
   lineHeights: {
@@ -120,6 +188,22 @@ export const typography = {
     normal: 1.5,
     relaxed: 1.625,
     loose: 2,
+    3: '0.75rem',
+    4: '1rem',
+    5: '1.25rem',
+    6: '1.5rem',
+    7: '1.75rem',
+    8: '2rem',
+    9: '2.25rem',
+    10: '2.5rem',
+  },
+  letterSpacing: {
+    tighter: '-0.05em',
+    tight: '-0.025em',
+    normal: '0em',
+    wide: '0.025em',
+    wider: '0.05em',
+    widest: '0.1em',
   },
 };
 
@@ -131,10 +215,10 @@ export const borderRadius = {
   lg: 8,
   xl: 12,
   '2xl': 16,
+  '3xl': 24,
   full: 9999,
 };
 
-// Animation tokens
 export const animations = {
   duration: {
     0: 0,
@@ -163,7 +247,6 @@ export const animations = {
   },
 };
 
-// Gradient tokens
 export const gradients = {
   primary: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.primary[600]} 100%)`,
   subtle: `linear-gradient(180deg, ${colors.white} 0%, #FFF5F5 100%)`,
@@ -179,8 +262,47 @@ export const shadow = {
   md: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)',
   lg: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
   xl: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+  '2xl': '0 35px 60px -15px rgba(0, 0, 0, 0.3)',
   brand: `0 4px 14px 0 ${colors.primary[500]}33`,
   inner: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)',
+  none: 'none',
+};
+
+export const zIndex = {
+  hide: -1,
+  auto: 'auto',
+  base: 0,
+  dropdown: 10,
+  sticky: 20,
+  fixed: 30,
+  modalBackdrop: 40,
+  modal: 50,
+  popover: 60,
+  tooltip: 70,
+  toast: 80,
+  overlay: 90,
+  max: 999,
+};
+
+export const layout = {
+  headerHeight: 64,
+  sidebarWidth: 280,
+  sidebarWidthCollapsed: 72,
+  mobileMenuHeight: 56,
+  containerMaxWidth: 1280,
+  containerPadding: 16,
+  cardPadding: 24,
+  buttonHeight: {
+    sm: 32,
+    md: 40,
+    lg: 48,
+    xl: 56,
+  },
+  inputHeight: {
+    sm: 32,
+    md: 40,
+    lg: 48,
+  },
 };
 
 export type Theme = {
@@ -191,6 +313,8 @@ export type Theme = {
   animations: typeof animations;
   gradients: typeof gradients;
   shadow: typeof shadow;
+  zIndex: typeof zIndex;
+  layout: typeof layout;
 };
 
 export const theme: Theme = {
@@ -201,4 +325,6 @@ export const theme: Theme = {
   animations,
   gradients,
   shadow,
+  zIndex,
+  layout,
 };

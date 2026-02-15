@@ -2,21 +2,21 @@ import { colors } from '@propflow/theme';
 import * as Haptics from 'expo-haptics';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    SafeAreaView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import Animated, {
-    Easing,
-    Extrapolate,
-    interpolate,
-    useAnimatedStyle,
-    useSharedValue,
-    withTiming,
+  Easing,
+  Extrapolate,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
 } from 'react-native-reanimated';
 import { authApi } from '../../api/auth';
 import { RootStackScreenProps } from '../../navigation/AppNavigator';
@@ -90,10 +90,7 @@ export const WelcomeScreen = ({ navigation }: RootStackScreenProps<'Welcome'>) =
           <Text style={styles.logoText}>PF</Text>
         </Animated.View>
         {/* @ts-ignore */}
-        <Animated.Text 
-          style={[styles.title, logoStyle]} 
-          accessibilityRole="header"
-        >
+        <Animated.Text style={[styles.title, logoStyle]} accessibilityRole="header">
           PropFlow
         </Animated.Text>
       </View>
@@ -123,8 +120,8 @@ export const WelcomeScreen = ({ navigation }: RootStackScreenProps<'Welcome'>) =
           accessibilityHint="Enter your phone number with country code to receive an OTP"
         />
         {error ? (
-          <Text 
-            style={styles.errorText} 
+          <Text
+            style={styles.errorText}
             accessibilityLiveRegion="assertive"
             accessibilityRole="alert"
           >
@@ -144,13 +141,13 @@ export const WelcomeScreen = ({ navigation }: RootStackScreenProps<'Welcome'>) =
           </View>
         </View>
 
-        <TouchableOpacity 
-          style={[styles.button, isSendingOtp ? styles.buttonDisabled : null]} 
+        <TouchableOpacity
+          style={[styles.button, isSendingOtp ? styles.buttonDisabled : null]}
           onPress={handleGetStarted}
           disabled={isSendingOtp}
           activeOpacity={0.8}
           accessibilityRole="button"
-          accessibilityLabel={isSendingOtp ? "Sending OTP" : "Get Started"}
+          accessibilityLabel={isSendingOtp ? 'Sending OTP' : 'Get Started'}
           accessibilityHint="Requests a one-time password to be sent to your phone"
         >
           {isSendingOtp ? (
@@ -160,7 +157,7 @@ export const WelcomeScreen = ({ navigation }: RootStackScreenProps<'Welcome'>) =
           )}
         </TouchableOpacity>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.secondaryButton}
           onPress={handleGetStarted}
           disabled={isSendingOtp}
@@ -176,8 +173,8 @@ export const WelcomeScreen = ({ navigation }: RootStackScreenProps<'Welcome'>) =
 };
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
+  container: {
+    flex: 1,
     backgroundColor: colors.white,
     paddingHorizontal: 24,
   },
@@ -205,19 +202,19 @@ const styles = StyleSheet.create({
     fontSize: 40,
     fontWeight: 'bold',
   },
-  title: { 
-    fontSize: 36, 
-    fontWeight: 'bold', 
+  title: {
+    fontSize: 36,
+    fontWeight: 'bold',
     color: colors.primary[600],
     letterSpacing: -0.5,
   },
   contentContainer: {
     paddingBottom: 40,
   },
-  subtitle: { 
-    fontSize: 24, 
+  subtitle: {
+    fontSize: 24,
     fontWeight: '600',
-    color: colors.black, 
+    color: colors.black,
     marginBottom: 12,
   },
   description: {
@@ -236,7 +233,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   errorText: {
-    color: colors.error,
+    color: colors.error[500],
     marginBottom: 16,
     fontSize: 13,
   },
@@ -256,8 +253,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.gray[600],
   },
-  button: { 
-    backgroundColor: colors.primary[500], 
+  button: {
+    backgroundColor: colors.primary[500],
     height: 56,
     borderRadius: 16,
     justifyContent: 'center',
@@ -271,9 +268,9 @@ const styles = StyleSheet.create({
   buttonDisabled: {
     opacity: 0.7,
   },
-  buttonText: { 
-    color: colors.white, 
-    fontSize: 18, 
+  buttonText: {
+    color: colors.white,
+    fontSize: 18,
     fontWeight: 'bold',
     letterSpacing: 1,
   },

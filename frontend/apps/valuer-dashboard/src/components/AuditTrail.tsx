@@ -37,14 +37,14 @@ interface AuditTrailProps {
 }
 
 const actionConfig: Record<AuditEntry['action'], { icon: any; color: string; label: string }> = {
-  created: { icon: FileText, color: colors.info, label: 'Property Created' },
-  submitted: { icon: ArrowRight, color: colors.info, label: 'Submitted for Review' },
-  assigned: { icon: User, color: colors.warning, label: 'Assigned to Valuer' },
-  reviewed: { icon: Clock, color: colors.warning, label: 'Review Started' },
-  approved: { icon: CheckCircle2, color: colors.success, label: 'Valuation Approved' },
-  rejected: { icon: AlertCircle, color: colors.error, label: 'Valuation Rejected' },
-  follow_up: { icon: MessageSquare, color: colors.warning, label: 'Follow-up Requested' },
-  completed: { icon: CheckCircle2, color: colors.success, label: 'Process Completed' },
+  created: { icon: FileText, color: colors.info[500], label: 'Property Created' },
+  submitted: { icon: ArrowRight, color: colors.info[500], label: 'Submitted for Review' },
+  assigned: { icon: User, color: colors.warning[500], label: 'Assigned to Valuer' },
+  reviewed: { icon: Clock, color: colors.warning[500], label: 'Review Started' },
+  approved: { icon: CheckCircle2, color: colors.success[500], label: 'Valuation Approved' },
+  rejected: { icon: AlertCircle, color: colors.error[500], label: 'Valuation Rejected' },
+  follow_up: { icon: MessageSquare, color: colors.warning[500], label: 'Follow-up Requested' },
+  completed: { icon: CheckCircle2, color: colors.success[500], label: 'Process Completed' },
 };
 
 export const AuditTrail: React.FC<AuditTrailProps> = ({ entries, className }) => {
