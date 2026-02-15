@@ -1,6 +1,6 @@
-import React from 'react';
+import { colors } from '@propflow/theme';
 import { Keyboard } from 'lucide-react';
-import { colors, spacing, typography } from '@propflow/theme';
+import React from 'react';
 import { Modal } from './Modal';
 
 interface Shortcut {
@@ -46,40 +46,43 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Keyboard Shortcuts">
-      <div style={{ padding: spacing[4] }}>
+      <div style={{ paddingBottom: 10 }}>
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: spacing[3],
-            marginBottom: spacing[6],
-            padding: spacing[4],
-            backgroundColor: colors.primary[50],
-            borderRadius: '8px',
+            gap: 16,
+            marginBottom: 32,
+            padding: 24,
+            backgroundColor: `${colors.primary[50]}80`,
+            borderRadius: 24,
+            border: `1px solid ${colors.primary[100]}`,
           }}
         >
-          <Keyboard size={24} color={colors.primary[500]} />
+          <Keyboard size={32} color={colors.primary[600]} style={{ flexShrink: 0 }} />
           <span
             style={{
-              fontSize: typography.fontSizes.sm,
-              color: colors.gray[700],
+              fontSize: 14,
+              color: colors.gray[600],
+              lineHeight: 1.6,
             }}
           >
-            Use these shortcuts to navigate faster. Press <strong>?</strong> anytime to see this
-            help.
+            Enhance your efficiency with keyboard precision. These shortcuts work across the entire{' '}
+            <strong>PropFlow</strong> workspace.
           </span>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: spacing[4] }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {displayShortcuts.map((shortcut, index) => {
             if (!shortcut.key) {
               return (
                 <div
                   key={`divider-${index}`}
                   style={{
-                    height: '1px',
-                    backgroundColor: colors.gray[200],
-                    margin: `${spacing[2]}px 0`,
+                    height: '2px',
+                    backgroundColor: colors.gray[100],
+                    margin: '12px 0',
+                    borderRadius: 1,
                   }}
                 />
               );
@@ -92,13 +95,16 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  padding: `${spacing[2]}px 0`,
+                  padding: '12px 16px',
+                  borderRadius: 16,
+                  transition: 'background 0.2s',
                 }}
               >
                 <span
                   style={{
-                    fontSize: typography.fontSizes.sm,
-                    color: colors.gray[700],
+                    fontSize: 15,
+                    fontWeight: 600,
+                    color: colors.gray[800],
                   }}
                 >
                   {shortcut.description}
@@ -108,16 +114,16 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    minWidth: '32px',
-                    height: '32px',
-                    padding: `0 ${spacing[3]}px`,
+                    minWidth: '40px',
+                    height: '40px',
+                    padding: '0 12px',
                     backgroundColor: colors.white,
-                    border: `1px solid ${colors.gray[300]}`,
-                    borderRadius: '6px',
-                    boxShadow: '0 2px 0 rgba(0,0,0,0.1)',
-                    fontSize: typography.fontSizes.sm,
-                    fontWeight: typography.fontWeights.semibold as any,
-                    color: colors.gray[800],
+                    border: `2px solid ${colors.gray[100]}`,
+                    borderRadius: 12,
+                    boxShadow: '0 4px 0 rgba(0,0,0,0.05)',
+                    fontSize: 14,
+                    fontWeight: 800,
+                    color: colors.primary[600],
                     fontFamily: 'monospace',
                   }}
                 >

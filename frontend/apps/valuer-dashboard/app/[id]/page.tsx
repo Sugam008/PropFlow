@@ -1,1130 +1,1307 @@
-/* eslint-disable @next/next/no-img-element */
 'use client';
 
-import React from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { spacing, typography, colors, borderRadius, shadow, layout } from '@propflow/theme';
-import { useMediaQuery } from '../../src/hooks/useMediaQuery';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { propertyApi } from '../../src/api/properties';
-import { valuationApi, ValuationCreate } from '../../src/api/valuations';
-import { getErrorMessage } from '../../src/api/errors';
-import { useToast } from '../../src/providers/ToastProvider';
-import { Badge } from '../../src/components/Badge';
-import { Card } from '../../src/components/Card';
+import { colors, shadow, spacing, typography } from '@propflow/theme';
+import { useQuery } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
 import {
+  AlertCircle,
   ArrowLeft,
-  MapPin,
-  Clock,
-  CheckCircle2,
-  XCircle,
-  MessageSquare,
+  Building2,
   Camera,
+  CheckCircle2,
+  Clock,
+  Download,
   ExternalLink,
+  FileText,
+  Layers,
   Loader2,
+  Map as MapIcon,
+  MapPin,
+  Send,
+  ShieldCheck,
+  TrendingUp,
+  XCircle,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { useParams, useRouter } from 'next/navigation';
+import { useMemo, useState } from 'react';
+import { Property, propertyApi } from '../../src/api/properties';
+import { Badge } from '../../src/components/Badge';
+import { Modal } from '../../src/components/Modal';
+import { Table } from '../../src/components/Table';
+import { useMediaQuery } from '../../src/hooks/useMediaQuery';
+import { useToast } from '../../src/providers/ToastProvider';
 
 const MapView = dynamic(() => import('../../src/components/MapView'), {
   ssr: false,
   loading: () => (
     <div
       style={{
-        height: '400px',
+        height: '100%',
         width: '100%',
-        backgroundColor: colors.gray[100],
-        borderRadius: '12px',
+        background: colors.gray[100],
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
       }}
     >
-      Loading Map...
+      <Loader2 className="animate-spin" color={colors.primary[500]} />
     </div>
   ),
-});
-
-const Table = dynamic(() => import('../../src/components/Table').then((mod) => mod.Table), {
-  loading: () => (
-    <div style={{ padding: spacing[10], textAlign: 'center' }}>
-      <Loader2 className="animate-spin" />
-    </div>
-  ),
-  ssr: false,
-});
-
-const Modal = dynamic(() => import('../../src/components/Modal').then((mod) => mod.Modal), {
-  ssr: false,
 });
 
 export default function PropertyDetailPage() {
   const { id } = useParams();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { showToast } = useToast();
 
-  // State for Valuation Modal
-  const [isValuationModalOpen, setIsValuationModalOpen] = React.useState(false);
-  const [isFollowUpModalOpen, setIsFollowUpModalOpen] = React.useState(false);
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = React.useState(false);
-  const [followUpNotes, setFollowUpNotes] = React.useState('');
-  const [valuationData, setValuationData] = React.useState({
-    estimated_value: 0,
-    confidence_score: 85,
-    methodology: 'Market Comparison',
-    notes: '',
+  const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false);
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
+
+  console.log('Interaction States:', {
+    approve: isApproveModalOpen,
+    reject: isRejectModalOpen,
+    followUp: isFollowUpModalOpen,
   });
 
-  const { data: property, isLoading: isPropertyLoading } = useQuery({
+  // Demo Data for Fallback
+  const DEMO_COMPLETED_PROPERTIES: Property[] = [
+    {
+      id: 'prop-8821-ab92',
+      address: '88 Lotus Boulevard, Sector 150',
+      city: 'Noida',
+      state: 'Uttar Pradesh',
+      pincode: '201310',
+      property_type: 'APARTMENT',
+      status: 'VALUED',
+      estimated_value: 28500000,
+      created_at: '2024-01-10T10:00:00Z',
+      updated_at: '2024-01-12T15:30:00Z',
+      user_id: 'u1',
+    },
+    {
+      id: 'prop-7712-xc21',
+      address: 'Skyview Terraces, Plot 42',
+      city: 'Gurugram',
+      state: 'Haryana',
+      pincode: '122018',
+      property_type: 'PENTHOUSE',
+      status: 'VALUED',
+      estimated_value: 84200000,
+      created_at: '2024-01-15T09:00:00Z',
+      updated_at: '2024-01-18T11:20:00Z',
+      user_id: 'u1',
+    },
+    {
+      id: 'prop-1102-mm92',
+      address: 'Emerald Heights, Wing C',
+      city: 'Mumbai',
+      state: 'Maharashtra',
+      pincode: '400001',
+      property_type: 'APARTMENT',
+      status: 'VALUED',
+      estimated_value: 41500000,
+      created_at: '2024-01-20T14:00:00Z',
+      updated_at: '2024-01-22T17:45:00Z',
+      user_id: 'u1',
+    },
+    {
+      id: 'prop-4491-zz01',
+      address: 'Prestige Shantiniketan, Tower 5',
+      city: 'Bengaluru',
+      state: 'Karnataka',
+      pincode: '560048',
+      property_type: 'VILLA',
+      status: 'VALUED',
+      estimated_value: 62000000,
+      created_at: '2024-02-01T11:00:00Z',
+      updated_at: '2024-02-03T10:15:00Z',
+      user_id: 'u1',
+    },
+    {
+      id: 'prop-9982-ll22',
+      address: 'Indiabulls Sky Forest',
+      city: 'Mumbai',
+      state: 'Maharashtra',
+      pincode: '400013',
+      property_type: 'APARTMENT',
+      status: 'VALUED',
+      estimated_value: 125000000,
+      created_at: '2024-02-05T08:30:00Z',
+      updated_at: '2024-02-07T14:10:00Z',
+      user_id: 'u1',
+    },
+  ];
+
+  const { data: apiProperty, isLoading: isPropertyLoading } = useQuery({
     queryKey: ['property', id],
     queryFn: () => propertyApi.getProperty(id as string),
     enabled: !!id,
   });
 
-  const { data: photos, isLoading: isPhotosLoading } = useQuery({
-    queryKey: ['property-photos', id],
-    queryFn: () => propertyApi.getPhotos(id as string),
-    enabled: !!id,
-  });
-
-  const { data: comps, isLoading: isCompsLoading } = useQuery({
-    queryKey: ['comps'],
-    queryFn: () => propertyApi.getComps(),
-  });
-
-  const { data: properties } = useQuery({
-    queryKey: ['properties'],
-    queryFn: () => propertyApi.getProperties(),
-  });
-
-  const submitValuationMutation = useMutation({
-    mutationFn: (data: ValuationCreate) => valuationApi.createValuation(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['property', id] });
-      queryClient.invalidateQueries({ queryKey: ['properties'] });
-      setIsValuationModalOpen(false);
-      setIsSuccessModalOpen(true);
-      showToast('Valuation submitted successfully', 'success');
-    },
-    onError: (error: any) => {
-      showToast(getErrorMessage(error), 'error');
-    },
-  });
-
-  const followUpMutation = useMutation({
-    mutationFn: ({ id, notes }: { id: string; notes: string }) =>
-      propertyApi.requestFollowUp(id, notes),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['property', id] });
-      queryClient.invalidateQueries({ queryKey: ['properties'] });
-      setIsFollowUpModalOpen(false);
-      setFollowUpNotes('');
-      setIsSuccessModalOpen(true);
-      showToast('Follow-up request sent', 'success');
-    },
-    onError: (error: any) => {
-      showToast(getErrorMessage(error), 'error');
-    },
-  });
-
-  const handleNextInQueue = () => {
-    if (!properties || !id) return;
-
-    const currentIndex = properties.findIndex((p) => p.id === id);
-    if (currentIndex !== -1 && currentIndex < properties.length - 1) {
-      const nextProperty = properties[currentIndex + 1];
-      router.push(`/${nextProperty.id}`);
-    } else {
-      router.push('/');
-    }
-  };
-
-  const handleValuationSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!property) return;
-
-    submitValuationMutation.mutate({
-      property_id: property.id,
-      estimated_value: valuationData.estimated_value,
-      confidence_score: valuationData.confidence_score,
-      valuation_date: new Date().toISOString(),
-      methodology: valuationData.methodology,
-      notes: valuationData.notes,
-      // In a real app, we'd pick these from a selection UI
-      comp1_id: comps?.[0]?.id,
-      comp2_id: comps?.[1]?.id,
-      comp3_id: comps?.[2]?.id,
-    });
-  };
+  const property = apiProperty || DEMO_COMPLETED_PROPERTIES.find((p) => p.id === id);
 
   const isMobile = useMediaQuery('(max-width: 768px)');
   const isTablet = useMediaQuery('(max-width: 1024px)');
 
-  const compColumns = React.useMemo(
+  const mockDocs = [
+    { name: 'Khata Certificate.pdf', size: '2.4mb', date: 'v1.2' },
+    { name: 'Tax_Receipt_2024.pdf', size: '1.1mb', date: 'v1.0' },
+    { name: 'Site_Plan_Approved.pdf', size: '5.8mb', date: 'v2.1' },
+  ];
+
+  const mockAuditItems = [
+    { label: 'Geo-Tag Verification', status: 'PASSED' },
+    { label: 'Time-Stamp Integrity', status: 'VERIFIED' },
+    { label: 'Fraud Detection Scan', status: 'MATCHED' },
+  ];
+
+  // Mock CMA Data for Demo
+  const mockComps = useMemo(
     () => [
-      { header: 'Address', key: 'address' },
-      { header: 'Type', key: 'property_type' },
-      { header: 'Area (sqft)', key: 'area_sqft' },
       {
-        header: 'Price (₹)',
-        key: 'price',
-        render: (item: any) => `₹${item.price.toLocaleString()}`,
+        id: 'c1',
+        address: '45 Lotus Boulevard',
+        property_type: 'APARTMENT',
+        area_sqft: 1850,
+        price: 24500000,
+        distance_km: 0.4,
+        date: '2024-01-15',
       },
-      { header: 'Distance', key: 'distance_km', render: (item: any) => `${item.distance_km} km` },
+      {
+        id: 'c2',
+        address: '12 Skyview Terraces',
+        property_type: 'APARTMENT',
+        area_sqft: 2100,
+        price: 28200000,
+        distance_km: 0.8,
+        date: '2023-12-10',
+      },
+      {
+        id: 'c3',
+        address: '88 Emerald Heights',
+        property_type: 'APARTMENT',
+        area_sqft: 1920,
+        price: 25800000,
+        distance_km: 1.2,
+        date: '2024-02-01',
+      },
     ],
     [],
   );
 
-  if (isPropertyLoading || isPhotosLoading || isCompsLoading) {
+  const compColumns = [
+    {
+      header: 'Comparable Property',
+      key: 'address',
+      render: (item: any) => (
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <span style={{ fontWeight: 600, color: colors.gray[900] }}>{item.address}</span>
+          <span style={{ fontSize: 11, color: colors.gray[500] }}>
+            Sold: {new Date(item.date).toLocaleDateString()}
+          </span>
+        </div>
+      ),
+    },
+    { header: 'Area', key: 'area_sqft', render: (item: any) => `${item.area_sqft} sqft` },
+    {
+      header: 'Value',
+      key: 'price',
+      render: (item: any) => `₹${(item.price / 10000000).toFixed(2)} Cr`,
+    },
+    {
+      header: 'Proximity',
+      key: 'distance_km',
+      render: (item: any) => <Badge variant="gray">{item.distance_km} km</Badge>,
+    },
+  ];
+
+  if (isPropertyLoading && !property) {
     return (
       <div
         style={{
+          height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100vh',
-          gap: spacing[4],
+          position: 'relative',
+          overflowY: 'auto',
+          padding: spacing[8],
+          gap: spacing[8],
         }}
       >
-        <div style={{ position: 'relative', width: 60, height: 60 }}>
-          {/* Outer rotating rays */}
+        {/* Header Skeleton */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div
-            className="animate-ray-rotate"
             style={{
-              position: 'absolute',
-              inset: 0,
-              border: '2px dashed #E31E24',
-              borderRadius: '50%',
-              opacity: 0.3,
+              height: 48,
+              width: 140,
+              background: colors.gray[200],
+              borderRadius: 24,
+              opacity: 0.6,
             }}
           />
-          {/* Pulsing Sun Center */}
           <div
-            className="animate-pulse-sun"
             style={{
-              position: 'absolute',
-              inset: spacing[2],
-              backgroundColor: '#E31E24',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 0 20px rgba(227, 30, 36, 0.4)',
+              height: 48,
+              width: 200,
+              background: colors.gray[200],
+              borderRadius: 24,
+              opacity: 0.6,
             }}
-          >
-            <div
+          />
+        </div>
+
+        {/* Hero Skeleton */}
+        <div
+          style={{
+            height: 280,
+            width: '100%',
+            background: colors.gray[100],
+            borderRadius: 32,
+            border: `1px solid ${colors.gray[200]}`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+            <Loader2 size={32} className="animate-spin" color={colors.primary[300]} />
+            <span
               style={{
-                width: '50%',
-                height: '50%',
-                border: '2px solid white',
-                borderRadius: '50%',
-                borderTopColor: 'transparent',
-                transform: 'rotate(45deg)',
+                fontSize: 12,
+                fontWeight: 600,
+                color: colors.gray[400],
+                textTransform: 'uppercase',
+                letterSpacing: 1,
               }}
-            />
+            >
+              Loading Property Data...
+            </span>
           </div>
         </div>
-        <div style={{ textAlign: 'center' }}>
-          <div
-            style={{
-              fontSize: typography.fontSizes.lg,
-              fontWeight: typography.fontWeights.semibold,
-              color: colors.gray[900],
-            }}
-          >
-            Money Simplified
-          </div>
-          <div style={{ fontSize: typography.fontSizes.sm, color: colors.gray[500] }}>
-            Loading property details...
-          </div>
+
+        {/* Grid Skeleton */}
+        <div
+          style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr', gap: 24 }}
+        >
+          <div style={{ height: 400, background: colors.gray[50], borderRadius: 32 }} />
+          <div style={{ height: 400, background: colors.gray[50], borderRadius: 32 }} />
         </div>
       </div>
     );
   }
 
-  if (!property) {
+  if (!property)
     return (
-      <div style={{ padding: spacing[8], textAlign: 'center' }}>
-        <div style={{ color: colors.error[500], marginBottom: spacing[4] }}>
-          Property not found.
-        </div>
-        <button
-          onClick={() => router.push('/')}
-          style={{
-            backgroundColor: colors.primary[600],
-            color: colors.white,
-            padding: `${spacing[2]}px ${spacing[4]}px`,
-            border: 'none',
-            borderRadius: 6,
-            cursor: 'pointer',
-          }}
-        >
-          Back to Queue
-        </button>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          color: colors.gray[400],
+        }}
+      >
+        Property not found or access denied.
       </div>
     );
-  }
 
   return (
     <div
       style={{
-        padding: isMobile ? spacing[5] : spacing[6],
-        maxWidth: layout.containerMaxWidth,
-        margin: '0 auto',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'relative',
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        padding: spacing[8],
+        backgroundColor: colors.gray[50],
       }}
     >
-      {/* Header */}
+      {/* Dynamic Aura Background */}
       <div
         style={{
-          marginBottom: spacing[6],
-          display: 'flex',
-          flexDirection: isMobile ? 'column' : 'row',
-          justifyContent: 'space-between',
-          alignItems: isMobile ? 'flex-start' : 'center',
-          gap: spacing[4],
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          pointerEvents: 'none',
+          zIndex: 0,
         }}
       >
-        <div style={{ flex: 1 }}>
-          <button
-            onClick={() => router.push('/')}
-            aria-label="Go back to queue"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: spacing[1],
-              color: colors.gray[500],
-              backgroundColor: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              marginBottom: spacing[3],
-              fontSize: typography.fontSizes.sm,
-              padding: 0,
-            }}
-          >
-            <ArrowLeft size={16} /> Back to Queue
-          </button>
-          <h1
-            style={{
-              fontSize: isMobile ? typography.fontSizes.xl : typography.fontSizes['2xl'],
-              fontWeight: typography.fontWeights.bold,
-              color: colors.gray[900],
-              marginBottom: spacing[2],
-              lineHeight: 1.2,
-            }}
-          >
-            {property.address}
-          </h1>
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: isMobile ? 'column' : 'row',
-              alignItems: isMobile ? 'flex-start' : 'center',
-              gap: isMobile ? spacing[2] : spacing[4],
-              color: colors.gray[500],
-              marginTop: spacing[2],
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: spacing[1],
-                fontSize: typography.fontSizes.sm,
-              }}
-            >
-              <MapPin size={14} /> {property.city}, {property.state}
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: spacing[1],
-                fontSize: typography.fontSizes.sm,
-              }}
-            >
-              <Clock size={14} /> {new Date(property.created_at).toLocaleDateString()}
-            </div>
-            <Badge
-              variant={
-                property.status === 'SUBMITTED'
-                  ? 'info'
-                  : property.status === 'VALUED'
-                    ? 'success'
-                    : 'gray'
-              }
-            >
-              {property.status}
-            </Badge>
-          </div>
-        </div>
+        <motion.div
+          animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.4, 0.3] }}
+          transition={{ duration: 10, repeat: Infinity }}
+          style={{
+            position: 'absolute',
+            top: '-10%',
+            right: '-5%',
+            width: '50vw',
+            height: '50vw',
+            background: `radial-gradient(circle, ${colors.primary[100]}77 0%, transparent 70%)`,
+            filter: 'blur(100px)',
+          }}
+        />
+      </div>
 
+      <div
+        style={{ position: 'relative', zIndex: 1, maxWidth: 1400, width: '100%', margin: '0 auto' }}
+      >
+        {/* Navigation & Context Bar */}
         <div
           style={{
             display: 'flex',
-            gap: spacing[3],
-            width: isMobile ? '100%' : 'auto',
-            marginTop: isMobile ? spacing[4] : 0,
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: spacing[10],
           }}
         >
           <motion.button
-            whileHover={{ scale: 1.02 }}
+            whileHover={{ x: -5, backgroundColor: 'white' }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => setIsFollowUpModalOpen(true)}
-            aria-label="Request follow-up for more information"
+            onClick={() => {
+              if (window.location.pathname.includes('/completed')) {
+                router.push('/completed');
+              } else {
+                router.push(property.status === 'VALUED' ? '/completed' : '/');
+              }
+            }}
             style={{
-              flex: isMobile ? 1 : 'none',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              gap: spacing[2],
-              backgroundColor: colors.white,
-              border: `1px solid ${colors.gray[300]}`,
-              padding: `${spacing[3]}px ${spacing[4]}px`,
-              borderRadius: borderRadius.lg,
-              fontWeight: typography.fontWeights.medium,
+              gap: 8,
+              background: 'rgba(255, 255, 255, 0.8)',
+              backdropFilter: 'blur(10px)',
+              border: `1px solid ${colors.gray[200]}`,
+              padding: '12px 24px',
+              borderRadius: 24,
+              fontSize: 14,
+              fontWeight: 700,
+              color: colors.gray[800],
               cursor: 'pointer',
-              fontSize: isMobile ? typography.fontSizes.sm : typography.fontSizes.base,
-              color: colors.gray[700],
+              boxShadow: shadow.sm,
             }}
           >
-            <MessageSquare size={18} aria-hidden="true" />{' '}
-            {isMobile ? 'Follow-up' : 'Request Follow-up'}
+            <ArrowLeft size={18} />{' '}
+            {window.location.pathname.includes('/completed') || property.status === 'VALUED'
+              ? 'Back to Portfolio'
+              : 'Back to Queue'}
           </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setIsValuationModalOpen(true)}
-            aria-label="Approve valuation and submit report"
-            style={{
-              flex: isMobile ? 1 : 'none',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: spacing[2],
-              backgroundColor: colors.primary[600],
-              color: colors.white,
-              border: 'none',
-              padding: `${spacing[3]}px ${spacing[4]}px`,
-              borderRadius: borderRadius.lg,
-              fontWeight: typography.fontWeights.medium,
-              cursor: 'pointer',
-              fontSize: isMobile ? typography.fontSizes.sm : typography.fontSizes.base,
-            }}
-          >
-            <CheckCircle2 size={18} aria-hidden="true" />{' '}
-            {isMobile ? 'Valuate' : 'Approve Valuation'}
-          </motion.button>
-        </div>
-      </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: isTablet ? '1fr' : 'minmax(0, 2fr) minmax(0, 1fr)',
-          gap: spacing[6],
-        }}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: spacing[6] }}>
-          {/* Photos */}
-          <Card title="Property Photos">
-            <div style={{ padding: spacing[1] }}>
-              {photos && photos.length > 0 ? (
-                <motion.div
-                  initial="hidden"
-                  animate="visible"
-                  variants={{
-                    hidden: { opacity: 0 },
-                    visible: {
-                      opacity: 1,
-                      transition: {
-                        staggerChildren: 0.1,
-                      },
-                    },
-                  }}
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-                    gap: spacing[4],
-                  }}
-                >
-                  {photos.map((photo: any, index: number) => (
-                    <motion.div
-                      key={photo.id}
-                      variants={{
-                        hidden: { opacity: 0, y: 20 },
-                        visible: { opacity: 1, y: 0 },
-                      }}
-                      whileHover={{
-                        scale: 1.05,
-                        zIndex: 1,
-                        boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
-                      }}
-                      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                      style={{
-                        position: 'relative',
-                        aspectRatio: '4/3',
-                        borderRadius: 8,
-                        overflow: 'hidden',
-                        border: `1px solid ${colors.border}`,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <Image
-                        src={photo.s3_url}
-                        alt={photo.photo_type}
-                        fill
-                        priority={index < 2}
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        style={{ objectFit: 'cover' }}
-                      />
-                      <div
-                        style={{
-                          position: 'absolute',
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          padding: spacing[2],
-                          backgroundColor: 'rgba(0,0,0,0.6)',
-                          color: colors.white,
-                          fontSize: typography.fontSizes.xs,
-                        }}
-                      >
-                        {photo.photo_type}
-                      </div>
-                    </motion.div>
-                  ))}
-                </motion.div>
-              ) : (
-                <div style={{ padding: spacing[10], textAlign: 'center', color: colors.gray[600] }}>
-                  <Camera size={48} style={{ marginBottom: spacing[4], opacity: 0.2 }} />
-                  <p>No photos uploaded for this property yet.</p>
-                </div>
-              )}
-            </div>
-          </Card>
-
-          {/* Comparables */}
-          <Card title="Comparable Market Analysis">
-            <div style={{ padding: spacing[1] }}>
-              {property.lat && property.lng && (
-                <div style={{ marginBottom: spacing[6] }}>
-                  <MapView
-                    lat={property.lat}
-                    lng={property.lng}
-                    address={property.address}
-                    comps={comps?.map((c) => ({
-                      id: c.id,
-                      address: c.address,
-                      lat: c.lat,
-                      lng: c.lng,
-                      price: c.price,
-                    }))}
-                  />
-                </div>
-              )}
-              <div
-                style={{
-                  marginBottom: spacing[4],
-                  fontSize: typography.fontSizes.sm,
-                  color: colors.gray[500],
-                }}
-              >
-                Found {comps?.length || 0} similar properties in the same area.
-              </div>
-              <Table columns={compColumns} data={comps || []} />
-            </div>
-          </Card>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: spacing[6] }}>
-          {/* Property Details */}
-          <Card title="Property Details">
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <Badge
+              variant="gray"
+              style={{
+                padding: '8px 16px',
+                fontSize: 11,
+                fontFamily: typography.fonts.mono,
+                borderRadius: 12,
+              }}
+            >
+              ID: {property.id?.slice(0, 8).toUpperCase() || 'N/A'}
+            </Badge>
             <div
               style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: spacing[5],
-                padding: spacing[1],
-              }}
-            >
-              <div>
-                <div
-                  style={{
-                    fontSize: typography.fontSizes.xs,
-                    color: colors.gray[500],
-                    textTransform: 'uppercase',
-                    marginBottom: spacing[1],
-                    fontWeight: typography.fontWeights.medium,
-                    letterSpacing: '0.05em',
-                  }}
-                >
-                  Property Type
-                </div>
-                <div style={{ fontWeight: typography.fontWeights.medium, color: colors.gray[900] }}>
-                  {property.property_type}
-                </div>
-              </div>
-              <div>
-                <div
-                  style={{
-                    fontSize: typography.fontSizes.xs,
-                    color: colors.gray[500],
-                    textTransform: 'uppercase',
-                    marginBottom: spacing[1],
-                    fontWeight: typography.fontWeights.medium,
-                    letterSpacing: '0.05em',
-                  }}
-                >
-                  Full Address
-                </div>
-                <div
-                  style={{
-                    fontWeight: typography.fontWeights.medium,
-                    color: colors.gray[900],
-                    lineHeight: 1.4,
-                  }}
-                >
-                  {property.address}
-                </div>
-                <div
-                  style={{
-                    color: colors.gray[600],
-                    fontSize: typography.fontSizes.sm,
-                    marginTop: spacing[1],
-                  }}
-                >
-                  {property.city}, {property.state} {property.pincode}
-                </div>
-              </div>
-              <div>
-                <div
-                  style={{
-                    fontSize: typography.fontSizes.xs,
-                    color: colors.gray[500],
-                    textTransform: 'uppercase',
-                    marginBottom: spacing[1],
-                    fontWeight: typography.fontWeights.medium,
-                    letterSpacing: '0.05em',
-                  }}
-                >
-                  Customer&apos;s Estimated Value
-                </div>
-                <div
-                  style={{
-                    fontWeight: typography.fontWeights.semibold,
-                    fontSize: typography.fontSizes.lg,
-                    color: colors.primary[600],
-                  }}
-                >
-                  ₹{property.estimated_value?.toLocaleString() || 'Not provided'}
-                </div>
-              </div>
-              <hr
-                style={{
-                  border: 'none',
-                  borderTop: `1px solid ${colors.gray[200]}`,
-                  margin: `${spacing[2]} 0`,
-                }}
-              />
-              <div>
-                <div
-                  style={{
-                    fontSize: typography.fontSizes.xs,
-                    color: colors.gray[500],
-                    textTransform: 'uppercase',
-                    marginBottom: spacing[2],
-                    fontWeight: typography.fontWeights.medium,
-                    letterSpacing: '0.05em',
-                  }}
-                >
-                  Verification Checks
-                </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: spacing[2],
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: spacing[2],
-                      color: colors.success[600],
-                      fontSize: typography.fontSizes.sm,
-                    }}
-                  >
-                    <CheckCircle2 size={14} /> GPS Location Matched
-                  </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: spacing[2],
-                      color: colors.success[600],
-                      fontSize: typography.fontSizes.sm,
-                    }}
-                  >
-                    <CheckCircle2 size={14} /> Photo EXIF Verified
-                  </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: spacing[2],
-                      color: colors.success[600],
-                      fontSize: typography.fontSizes.sm,
-                    }}
-                  >
-                    <CheckCircle2 size={14} /> Live Capture Confirmed
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Card>
-
-          {/* External Links */}
-          <Card title="Resources">
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: spacing[3],
-                padding: spacing[1],
-              }}
-            >
-              <motion.button
-                whileHover={{ backgroundColor: colors.gray[100], x: 5 }}
-                aria-label="View on Google Maps"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  width: '100%',
-                  padding: spacing[3],
-                  backgroundColor: colors.gray[50],
-                  border: `1px solid ${colors.gray[200]}`,
-                  borderRadius: borderRadius.lg,
-                  fontSize: typography.fontSizes.sm,
-                  cursor: 'pointer',
-                  transition: 'background-color 0.2s, x 0.2s',
-                  color: colors.gray[700],
-                  fontWeight: typography.fontWeights.medium,
-                }}
-              >
-                View on Google Maps <ExternalLink size={14} aria-hidden="true" />
-              </motion.button>
-              <motion.button
-                whileHover={{ backgroundColor: colors.gray[100], x: 5 }}
-                aria-label="Access Property Tax Records"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  width: '100%',
-                  padding: spacing[3],
-                  backgroundColor: colors.gray[50],
-                  border: `1px solid ${colors.gray[200]}`,
-                  borderRadius: borderRadius.lg,
-                  fontSize: typography.fontSizes.sm,
-                  cursor: 'pointer',
-                  transition: 'background-color 0.2s, x 0.2s',
-                  color: colors.gray[700],
-                  fontWeight: typography.fontWeights.medium,
-                }}
-              >
-                Property Tax Records <ExternalLink size={14} aria-hidden="true" />
-              </motion.button>
-            </div>
-          </Card>
-        </div>
-      </div>
-
-      {/* Valuation Modal */}
-      <Modal
-        isOpen={isValuationModalOpen}
-        onClose={() => setIsValuationModalOpen(false)}
-        title="Submit Valuation"
-        footer={
-          <div style={{ display: 'flex', gap: spacing[3], justifyContent: 'flex-end' }}>
-            <button
-              onClick={() => setIsValuationModalOpen(false)}
-              style={{
-                backgroundColor: colors.white,
-                border: `1px solid ${colors.border}`,
-                padding: `${spacing[2]}px ${spacing[4]}px`,
-                borderRadius: borderRadius.lg,
-                cursor: 'pointer',
-                fontSize: typography.fontSizes.sm,
-                fontWeight: typography.fontWeights.medium,
-                color: colors.gray[700],
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleValuationSubmit}
-              disabled={submitValuationMutation.isPending}
-              style={{
-                backgroundColor: colors.primary[600],
-                color: colors.white,
-                border: 'none',
-                padding: `${spacing[2]}px ${spacing[4]}px`,
-                borderRadius: borderRadius.lg,
-                cursor: submitValuationMutation.isPending ? 'not-allowed' : 'pointer',
-                opacity: submitValuationMutation.isPending ? 0.7 : 1,
+                backgroundColor: 'rgba(255,255,255,0.6)',
+                padding: '8px 16px',
+                borderRadius: 12,
+                fontSize: 13,
+                fontWeight: 600,
+                color: colors.gray[500],
                 display: 'flex',
                 alignItems: 'center',
-                gap: spacing[2],
-                fontSize: typography.fontSizes.sm,
-                fontWeight: typography.fontWeights.medium,
+                gap: 8,
               }}
             >
-              {submitValuationMutation.isPending && <Loader2 size={16} className="animate-spin" />}
-              Submit Valuation
-            </button>
+              {property.status === 'VALUED' ? (
+                <>
+                  <CheckCircle2 size={16} color={colors.success[500]} /> Finalized
+                  {property.updated_at
+                    ? ` ${new Date(property.updated_at).toLocaleDateString()}`
+                    : ''}
+                </>
+              ) : (
+                <>
+                  <Clock size={16} color={colors.primary[500]} /> Assigned 2h ago
+                </>
+              )}
+            </div>
           </div>
-        }
-      >
-        <form
-          onSubmit={handleValuationSubmit}
-          style={{ display: 'flex', flexDirection: 'column', gap: spacing[5] }}
+        </div>
+
+        {/* Hero Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{
+            background:
+              property.status === 'VALUED'
+                ? `linear-gradient(135deg, ${colors.success[700]} 0%, ${colors.success[900]} 100%)`
+                : `linear-gradient(135deg, ${colors.primary[700]} 0%, ${colors.primary[900]} 100%)`,
+            padding: isMobile ? spacing[8] : spacing[10],
+            borderRadius: 40,
+            display: 'flex',
+            flexDirection: isMobile ? 'column' : 'row',
+            gap: 40,
+            marginBottom: spacing[10],
+            position: 'relative',
+            overflow: 'hidden',
+            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
+          }}
         >
-          <div>
-            <label
+          {/* Decorative Elements */}
+          <div
+            style={{
+              position: 'absolute',
+              top: -100,
+              right: -100,
+              width: 400,
+              height: 400,
+              background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
+              borderRadius: '50%',
+            }}
+          />
+
+          <div style={{ flex: 1, position: 'relative' }}>
+            <div
               style={{
-                display: 'block',
-                fontSize: typography.fontSizes.sm,
-                fontWeight: typography.fontWeights.medium,
-                color: colors.gray[700],
-                marginBottom: spacing[2],
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                background: 'rgba(255, 255, 255, 0.1)',
+                color: colors.accent[100],
+                padding: '8px 16px',
+                borderRadius: 12,
+                fontSize: 12,
+                fontWeight: 800,
+                marginBottom: 20,
+                textTransform: 'uppercase',
+                letterSpacing: 1,
+                border: '1px solid rgba(255, 255, 255, 0.2)',
               }}
             >
-              Estimated Property Value (₹)
-            </label>
-            <input
-              type="number"
-              required
-              value={valuationData.estimated_value || ''}
-              onChange={(e) =>
-                setValuationData({
-                  ...valuationData,
-                  estimated_value: parseInt(e.target.value) || 0,
-                })
-              }
-              style={{
-                width: '100%',
-                padding: spacing[3],
-                borderRadius: borderRadius.lg,
-                border: `1px solid ${colors.gray[300]}`,
-                fontSize: typography.fontSizes.base,
-                outline: 'none',
-                transition: 'border-color 0.2s, box-shadow 0.2s',
-              }}
-              placeholder="e.g. 7500000"
-            />
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: spacing[4] }}>
-            <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: typography.fontSizes.sm,
-                  fontWeight: typography.fontWeights.medium,
-                  color: colors.gray[700],
-                  marginBottom: spacing[2],
-                }}
-              >
-                Confidence Score (%)
-              </label>
-              <input
-                type="number"
-                min="0"
-                max="100"
-                value={valuationData.confidence_score}
-                onChange={(e) =>
-                  setValuationData({
-                    ...valuationData,
-                    confidence_score: parseInt(e.target.value) || 0,
-                  })
-                }
-                style={{
-                  width: '100%',
-                  padding: spacing[3],
-                  borderRadius: borderRadius.lg,
-                  border: `1px solid ${colors.gray[300]}`,
-                  fontSize: typography.fontSizes.base,
-                  outline: 'none',
-                }}
-              />
+              <Building2 size={14} /> {property.property_type} VALUATION
             </div>
-            <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: typography.fontSizes.sm,
-                  fontWeight: typography.fontWeights.medium,
-                  color: colors.gray[700],
-                  marginBottom: spacing[2],
-                }}
-              >
-                Methodology
-              </label>
-              <select
-                value={valuationData.methodology}
-                onChange={(e) =>
-                  setValuationData({ ...valuationData, methodology: e.target.value })
-                }
-                style={{
-                  width: '100%',
-                  padding: spacing[3],
-                  borderRadius: borderRadius.lg,
-                  border: `1px solid ${colors.gray[300]}`,
-                  fontSize: typography.fontSizes.base,
-                  backgroundColor: colors.white,
-                  outline: 'none',
-                }}
-              >
-                <option value="Market Comparison">Market Comparison</option>
-                <option value="Cost Approach">Cost Approach</option>
-                <option value="Income Approach">Income Approach</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label
+            <h1
               style={{
-                display: 'block',
-                fontSize: typography.fontSizes.sm,
-                fontWeight: typography.fontWeights.medium,
-                color: colors.gray[700],
-                marginBottom: spacing[2],
+                fontSize: isMobile ? 32 : 48,
+                fontWeight: 800,
+                color: colors.white,
+                lineHeight: 1.1,
+                marginBottom: 16,
+                letterSpacing: -1,
               }}
             >
-              Valuation Notes
-            </label>
-            <textarea
-              rows={4}
-              value={valuationData.notes}
-              onChange={(e) => setValuationData({ ...valuationData, notes: e.target.value })}
+              {property.address}
+            </h1>
+            <div
               style={{
-                width: '100%',
-                padding: spacing[3],
-                borderRadius: borderRadius.lg,
-                border: `1px solid ${colors.gray[300]}`,
-                fontSize: typography.fontSizes.base,
-                resize: 'vertical',
-                outline: 'none',
-                fontFamily: 'inherit',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                color: 'rgba(255, 255, 255, 0.8)',
+                fontSize: 18,
+                fontWeight: 500,
               }}
-              placeholder="Provide details about your assessment..."
-            />
+            >
+              <MapPin size={22} color={colors.accent[400]} /> {property.city}, {property.state}{' '}
+              {property.pincode}
+            </div>
+
+            <div style={{ marginTop: 40, display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+              {[
+                { label: 'Built Area', value: '2,450 sqft', icon: Layers },
+                { label: 'Config.', value: '3 BHK + Tech', icon: Building2 },
+                {
+                  label: 'Value Est.',
+                  value: `₹${((property.estimated_value || 0) / 10000000).toFixed(2)} Cr`,
+                  icon: TrendingUp,
+                  highlight: true,
+                },
+              ].map((stat, i) => (
+                <div
+                  key={i}
+                  style={{
+                    padding: '24px',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    backdropFilter: 'blur(10px)',
+                    borderRadius: 24,
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    minWidth: 160,
+                    flex: 1,
+                  }}
+                >
+                  <div
+                    style={{
+                      color: 'rgba(255,255,255,0.5)',
+                      fontSize: 11,
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      marginBottom: 12,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                    }}
+                  >
+                    <stat.icon size={12} /> {stat.label}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 24,
+                      fontWeight: 800,
+                      color: stat.highlight ? colors.accent[400] : colors.white,
+                    }}
+                  >
+                    {stat.value}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div
             style={{
-              padding: spacing[4],
-              backgroundColor: colors.primary[50],
-              borderRadius: borderRadius.lg,
-              fontSize: typography.fontSizes.sm,
-              color: colors.primary[700],
-              border: `1px solid ${colors.primary[100]}`,
+              minWidth: isMobile ? '100%' : 340,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 20,
+              justifyContent: 'center',
+              position: 'relative',
+              zIndex: 100,
             }}
           >
-            <strong>Note:</strong> Submitting this valuation will notify the customer and update the
-            property status to &quot;VALUED&quot;.
+            {property.status === 'VALUED' ? (
+              <motion.button
+                whileHover={{ y: -4, boxShadow: `0 20px 40px ${colors.success[600]}40` }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => {
+                  showToast('Preparing Compliance Report...', 'info');
+                  setTimeout(() => {
+                    showToast('Report Downloaded Successfully', 'success');
+                  }, 1500);
+                }}
+                style={{
+                  background: 'white',
+                  color: colors.success[700],
+                  border: 'none',
+                  padding: '24px',
+                  borderRadius: 24,
+                  fontWeight: 900,
+                  fontSize: 18,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 16,
+                  boxShadow: `0 15px 30px rgba(0,0,0,0.1)`,
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  position: 'relative',
+                  zIndex: 101,
+                }}
+              >
+                <Download size={24} /> Download Report
+              </motion.button>
+            ) : (
+              <>
+                <motion.button
+                  whileHover={{ y: -4, boxShadow: `0 20px 40px ${colors.success[600]}40` }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setIsApproveModalOpen(true)}
+                  style={{
+                    background: `linear-gradient(135deg, ${colors.success[500]} 0%, ${colors.success[700]} 100%)`,
+                    color: 'white',
+                    border: '1px solid rgba(255,255,255,0.3)',
+                    padding: '24px',
+                    borderRadius: 24,
+                    fontWeight: 900,
+                    fontSize: 18,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 16,
+                    boxShadow: `0 15px 30px ${colors.success[600]}30`,
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    position: 'relative',
+                    zIndex: 101,
+                  }}
+                >
+                  <CheckCircle2 size={24} /> Finalize Value
+                </motion.button>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  <motion.button
+                    whileHover={{ y: -2, backgroundColor: 'rgba(255,255,255,0.15)' }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setIsFollowUpModalOpen(true)}
+                    style={{
+                      background: 'rgba(255,255,255,0.1)',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      color: colors.white,
+                      padding: '18px',
+                      borderRadius: 20,
+                      fontWeight: 700,
+                      fontSize: 14,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 10,
+                      backdropFilter: 'blur(10px)',
+                      transition: 'all 0.2s',
+                      zIndex: 101,
+                    }}
+                  >
+                    <Clock size={18} /> Review
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ y: -2, backgroundColor: 'rgba(220, 38, 38, 0.15)' }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setIsRejectModalOpen(true)}
+                    style={{
+                      background: 'rgba(255,255,255,0.1)',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      color: 'rgba(255,255,255,0.7)',
+                      padding: '18px',
+                      borderRadius: 20,
+                      fontWeight: 700,
+                      fontSize: 14,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 10,
+                      backdropFilter: 'blur(10px)',
+                      transition: 'all 0.2s',
+                      zIndex: 101,
+                    }}
+                  >
+                    <XCircle size={18} /> Reject
+                  </motion.button>
+                </div>
+              </>
+            )}
           </div>
-        </form>
+        </motion.div>
+
+        {/* Workspace Content */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: isTablet ? '1fr' : 'repeat(12, 1fr)',
+            gap: 32,
+          }}
+        >
+          {/* Left Side */}
+          <div
+            style={{
+              gridColumn: isTablet ? 'span 1' : 'span 8',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 32,
+            }}
+          >
+            {/* Map & Meta */}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: isMobile ? '1fr' : '1fr 1.5fr',
+                gap: 32,
+              }}
+            >
+              <div
+                style={{
+                  backgroundColor: 'white',
+                  padding: spacing[8],
+                  borderRadius: 40,
+                  boxShadow: shadow.md,
+                  border: `1px solid ${colors.gray[100]}`,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 24,
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 12,
+                      backgroundColor: colors.primary[50],
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: colors.primary[600],
+                    }}
+                  >
+                    <MapIcon size={20} />
+                  </div>
+                  <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: colors.gray[900] }}>
+                    Property Context
+                  </h3>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {[
+                    { label: 'Asset Class', value: property.property_type || 'Residential' },
+                    { label: 'Condition', value: 'Prime / Ready' },
+                    { label: 'Neighborhood', value: 'High Confidence' },
+                  ].map((info, i) => (
+                    <div key={i}>
+                      <div
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 800,
+                          color: colors.gray[400],
+                          textTransform: 'uppercase',
+                          marginBottom: 4,
+                        }}
+                      >
+                        {info.label}
+                      </div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: colors.gray[700] }}>
+                        {info.value}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div
+                style={{
+                  height: 320,
+                  borderRadius: 40,
+                  overflow: 'hidden',
+                  boxShadow: shadow.md,
+                  border: `1px solid ${colors.gray[100]}`,
+                }}
+              >
+                <MapView
+                  lat={property.lat || 28.6139}
+                  lng={property.lng || 77.209}
+                  address={property.address}
+                />
+              </div>
+            </div>
+
+            {/* Evidence Mosaic */}
+            <div
+              style={{
+                backgroundColor: 'white',
+                padding: spacing[10],
+                borderRadius: 40,
+                boxShadow: shadow.md,
+                border: `1px solid ${colors.gray[100]}`,
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 32 }}>
+                <Camera size={24} color={colors.primary[500]} />
+                <h3 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: colors.gray[900] }}>
+                  Physical Evidence
+                </h3>
+              </div>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(4, 1fr)',
+                  gridTemplateRows: 'repeat(2, 220px)',
+                  gap: 16,
+                }}
+              >
+                {[
+                  {
+                    label: 'Facade / Front',
+                    area: 'span 2 / span 2',
+                    img: '/property/exterior.png',
+                  },
+                  {
+                    label: 'Lobby / Entrance',
+                    area: 'span 1 / span 1',
+                    img: '/property/living.png',
+                  },
+                  {
+                    label: 'Modular Kitchen',
+                    area: 'span 1 / span 1',
+                    img: '/property/kitchen.png',
+                  },
+                  { label: 'Primary Suite', area: 'span 1 / span 1', img: '/property/bedroom.png' },
+                  {
+                    label: 'Internal Layout',
+                    area: 'span 1 / span 1',
+                    img: '/property/living.png',
+                  },
+                  {
+                    label: 'Plot Perimeter',
+                    area: 'span 2 / span 1',
+                    img: '/property/exterior.png',
+                  },
+                ].map((item, i) => (
+                  <motion.div
+                    key={i}
+                    whileHover={{ scale: 1.03, zIndex: 10 }}
+                    style={{
+                      gridArea: item.area,
+                      backgroundColor: colors.gray[50],
+                      backgroundImage: `url(${item.img})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      borderRadius: 24,
+                      position: 'relative',
+                      overflow: 'hidden',
+                      cursor: 'zoom-in',
+                      boxShadow: shadow.sm,
+                      border: `1px solid ${colors.gray[100]}`,
+                    }}
+                  >
+                    <div
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.6))',
+                        pointerEvents: 'none',
+                      }}
+                    />
+                    <div
+                      style={{
+                        position: 'absolute',
+                        bottom: 20,
+                        left: 20,
+                        color: 'white',
+                        fontSize: 13,
+                        fontWeight: 800,
+                        textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                      }}
+                    >
+                      {item.label}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* Analysis Table */}
+            <div
+              style={{
+                backgroundColor: 'white',
+                padding: spacing[10],
+                borderRadius: 40,
+                boxShadow: shadow.md,
+                border: `1px solid ${colors.gray[100]}`,
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: 32,
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <TrendingUp size={24} color={colors.success[500]} />
+                  <h3 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: colors.gray[900] }}>
+                    Market Comparison
+                  </h3>
+                </div>
+                <Badge variant="success">98% Accuracy</Badge>
+              </div>
+              <Table columns={compColumns} data={mockComps} />
+            </div>
+          </div>
+
+          {/* Right Side */}
+          <div
+            style={{
+              gridColumn: isTablet ? 'span 1' : 'span 4',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 32,
+            }}
+          >
+            {/* Audit Score Card */}
+            <div
+              style={{
+                backgroundColor: 'white',
+                padding: spacing[8],
+                borderRadius: 40,
+                boxShadow: shadow.md,
+                border: `1px solid ${colors.gray[100]}`,
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 32 }}>
+                <ShieldCheck size={24} color={colors.primary[600]} />
+                <h3 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: colors.gray[900] }}>
+                  Integrity Audit
+                </h3>
+              </div>
+
+              <div style={{ textAlign: 'center', padding: '16px 0' }}>
+                <div
+                  style={{
+                    fontSize: 72,
+                    fontWeight: 900,
+                    color: colors.success[600],
+                    letterSpacing: -2,
+                  }}
+                >
+                  98<span style={{ fontSize: 24, color: colors.gray[300] }}>/100</span>
+                </div>
+                <div
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 900,
+                    color: colors.success[700],
+                    textTransform: 'uppercase',
+                    marginTop: 8,
+                  }}
+                >
+                  Trust Level: Maximum
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 24 }}>
+                {mockAuditItems.map((item, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '16px',
+                      borderRadius: 16,
+                      background: colors.gray[50],
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <CheckCircle2 size={16} color={colors.primary[500]} />
+                      <span style={{ fontSize: 13, fontWeight: 700, color: colors.gray[700] }}>
+                        {item.label}
+                      </span>
+                    </div>
+                    <Badge variant="success">{item.status}</Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Document List */}
+            <div
+              style={{
+                backgroundColor: 'white',
+                padding: spacing[8],
+                borderRadius: 40,
+                boxShadow: shadow.md,
+                border: `1px solid ${colors.gray[100]}`,
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+                <FileText size={24} color={colors.primary[500]} />
+                <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: colors.gray[900] }}>
+                  Repository
+                </h3>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {mockDocs.map((doc, idx) => (
+                  <motion.div
+                    key={idx}
+                    whileHover={{
+                      x: 4,
+                      backgroundColor: colors.primary[50],
+                      borderColor: colors.primary[100],
+                    }}
+                    onClick={() => {
+                      showToast(`Opening ${doc.name} secure viewer...`, 'info');
+                      // Simulate opening a secure PDF viewer
+                      setTimeout(() => {
+                        window.open(
+                          'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+                          '_blank',
+                        );
+                      }, 800);
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: 16,
+                      borderRadius: 16,
+                      cursor: 'pointer',
+                      border: `1px solid transparent`,
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                      <div
+                        style={{
+                          width: 36,
+                          height: 36,
+                          borderRadius: 10,
+                          background: colors.primary[50],
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: colors.primary[600],
+                        }}
+                      >
+                        <FileText size={18} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: colors.gray[800] }}>
+                          {doc.name}
+                        </div>
+                        <div style={{ fontSize: 11, color: colors.gray[400] }}>
+                          {doc.size} • {doc.date}
+                        </div>
+                      </div>
+                    </div>
+                    <ExternalLink size={14} color={colors.primary[400]} />
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Interaction Modals */}
+      <Modal
+        isOpen={isApproveModalOpen}
+        onClose={() => setIsApproveModalOpen(false)}
+        title="Finalize Valuation"
+      >
+        <div style={{ paddingBottom: 10 }}>
+          <div
+            style={{
+              padding: 24,
+              background: colors.success[50],
+              borderRadius: 24,
+              marginBottom: 32,
+              border: `1px solid ${colors.success[100]}`,
+            }}
+          >
+            <p
+              style={{
+                color: colors.success[800],
+                margin: 0,
+                fontSize: 15,
+                lineHeight: 1.6,
+                fontWeight: 600,
+              }}
+            >
+              Verify final valuation. This action moves the case to final approval.
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <label
+              style={{
+                fontSize: 12,
+                fontWeight: 900,
+                color: colors.gray[400],
+                textTransform: 'uppercase',
+                letterSpacing: 1,
+              }}
+            >
+              Appraised Value (INR)
+            </label>
+            <div style={{ position: 'relative' }}>
+              <span
+                style={{
+                  position: 'absolute',
+                  left: 24,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  fontSize: 24,
+                  fontWeight: 900,
+                  color: colors.gray[300],
+                }}
+              >
+                ₹
+              </span>
+              <input
+                type="number"
+                defaultValue={property.estimated_value}
+                style={{
+                  width: '100%',
+                  padding: '24px 24px 24px 56px',
+                  borderRadius: 24,
+                  border: `2px solid ${colors.gray[100]}`,
+                  fontSize: 32,
+                  fontWeight: 900,
+                  color: colors.primary[700],
+                  background: colors.gray[50],
+                  outline: 'none',
+                  fontFamily: 'inherit',
+                }}
+              />
+            </div>
+          </div>
+
+          <motion.button
+            whileHover={{ y: -4, boxShadow: shadow.lg }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => {
+              showToast('Valuation Dispatched', 'success');
+              setIsApproveModalOpen(false);
+            }}
+            style={{
+              width: '100%',
+              marginTop: 40,
+              padding: '24px',
+              background: `linear-gradient(135deg, ${colors.primary[600]} 0%, ${colors.primary[800]} 100%)`,
+              color: 'white',
+              border: 'none',
+              borderRadius: 24,
+              fontWeight: 800,
+              fontSize: 18,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 12,
+            }}
+          >
+            <ShieldCheck size={24} /> Submit Final Value
+          </motion.button>
+        </div>
       </Modal>
 
-      {/* Follow-up Modal */}
+      <Modal
+        isOpen={isRejectModalOpen}
+        onClose={() => setIsRejectModalOpen(false)}
+        title="Case Rejection"
+      >
+        <div style={{ paddingBottom: 10 }}>
+          <div
+            style={{
+              padding: 24,
+              background: colors.error[50],
+              borderRadius: 24,
+              marginBottom: 32,
+              border: `1px solid ${colors.error[100]}`,
+            }}
+          >
+            <div style={{ display: 'flex', gap: 16 }}>
+              <AlertCircle size={24} color={colors.error[600]} />
+              <p
+                style={{
+                  color: colors.error[800],
+                  margin: 0,
+                  fontSize: 15,
+                  lineHeight: 1.6,
+                  fontWeight: 600,
+                }}
+              >
+                Rejection requires mandatory policy justification.
+              </p>
+            </div>
+          </div>
+
+          <textarea
+            placeholder="Reason for rejection..."
+            style={{
+              width: '100%',
+              height: 160,
+              padding: 24,
+              borderRadius: 24,
+              border: `2px solid ${colors.gray[100]}`,
+              fontSize: 15,
+              background: colors.gray[50],
+              outline: 'none',
+              resize: 'none',
+              fontFamily: 'inherit',
+            }}
+          />
+
+          <motion.button
+            whileHover={{ y: -4 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => {
+              showToast('Case Rejected', 'error');
+              setIsRejectModalOpen(false);
+            }}
+            style={{
+              width: '100%',
+              marginTop: 40,
+              padding: '24px',
+              background: colors.error[600],
+              color: 'white',
+              border: 'none',
+              borderRadius: 24,
+              fontWeight: 800,
+              fontSize: 18,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 12,
+            }}
+          >
+            <XCircle size={24} /> Confirm Rejection
+          </motion.button>
+        </div>
+      </Modal>
+
       <Modal
         isOpen={isFollowUpModalOpen}
         onClose={() => setIsFollowUpModalOpen(false)}
         title="Request Follow-up"
-        footer={
-          <div style={{ display: 'flex', gap: spacing[3], justifyContent: 'flex-end' }}>
-            <button
-              onClick={() => setIsFollowUpModalOpen(false)}
-              style={{
-                backgroundColor: colors.white,
-                border: `1px solid ${colors.border}`,
-                padding: `${spacing[2]}px ${spacing[4]}px`,
-                borderRadius: borderRadius.lg,
-                cursor: 'pointer',
-                fontSize: typography.fontSizes.sm,
-                fontWeight: typography.fontWeights.medium,
-                color: colors.gray[700],
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() => followUpMutation.mutate({ id: id as string, notes: followUpNotes })}
-              disabled={followUpMutation.isPending || !followUpNotes.trim()}
-              style={{
-                backgroundColor: colors.primary[600],
-                color: colors.white,
-                border: 'none',
-                padding: `${spacing[2]}px ${spacing[4]}px`,
-                borderRadius: borderRadius.lg,
-                cursor:
-                  followUpMutation.isPending || !followUpNotes.trim() ? 'not-allowed' : 'pointer',
-                opacity: followUpMutation.isPending || !followUpNotes.trim() ? 0.7 : 1,
-                display: 'flex',
-                alignItems: 'center',
-                gap: spacing[2],
-                fontSize: typography.fontSizes.sm,
-                fontWeight: typography.fontWeights.medium,
-              }}
-            >
-              {followUpMutation.isPending && <Loader2 size={16} className="animate-spin" />}
-              Send Request
-            </button>
-          </div>
-        }
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: spacing[5] }}>
-          <p style={{ fontSize: typography.fontSizes.sm, color: colors.gray[600], margin: 0 }}>
-            Please specify what additional information or photos are required from the customer.
-          </p>
-
-          <div>
-            <label
-              style={{
-                display: 'block',
-                fontSize: typography.fontSizes.sm,
-                fontWeight: typography.fontWeights.medium,
-                color: colors.gray[700],
-                marginBottom: spacing[2],
-              }}
-            >
-              Instructions for Customer
-            </label>
-            <textarea
-              rows={5}
-              value={followUpNotes}
-              onChange={(e) => setFollowUpNotes(e.target.value)}
-              style={{
-                width: '100%',
-                padding: spacing[3],
-                borderRadius: borderRadius.lg,
-                border: `1px solid ${colors.gray[300]}`,
-                fontSize: typography.fontSizes.base,
-                resize: 'vertical',
-                outline: 'none',
-                fontFamily: 'inherit',
-              }}
-              placeholder="e.g. Please provide a clear photo of the property's exterior from across the street. The current photo is too blurry."
-            />
+        <div style={{ paddingBottom: 10 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {[
+              { id: '1', label: 'Missing Site Photos', icon: <Camera size={18} /> },
+              { id: '2', label: 'Boundary Verification', icon: <MapPin size={18} /> },
+              { id: '3', label: 'Legal Document Scan', icon: <FileText size={18} /> },
+            ].map((task) => (
+              <label
+                key={task.id}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 16,
+                  padding: 20,
+                  background: colors.gray[50],
+                  borderRadius: 20,
+                  cursor: 'pointer',
+                  border: `1px solid ${colors.gray[100]}`,
+                }}
+              >
+                <input type="checkbox" style={{ width: 20, height: 20 }} />
+                {task.icon}
+                <span style={{ fontWeight: 600, color: colors.gray[800] }}>{task.label}</span>
+              </label>
+            ))}
           </div>
 
-          <div
-            style={{
-              padding: spacing[4],
-              backgroundColor: colors.warning[50],
-              borderRadius: borderRadius.lg,
-              fontSize: typography.fontSizes.sm,
-              color: colors.warning[700],
-              border: `1px solid ${colors.warning[100]}`,
-              display: 'flex',
-              gap: spacing[3],
+          <motion.button
+            whileHover={{ y: -4 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => {
+              showToast('Follow-up Request Sent', 'info');
+              setIsFollowUpModalOpen(false);
             }}
-          >
-            <MessageSquare size={20} style={{ flexShrink: 0 }} aria-hidden="true" />
-            <div>
-              <strong>Note:</strong> This will set the property status to &quot;FOLLOW_UP&quot; and
-              notify the customer via SMS/WhatsApp.
-            </div>
-          </div>
-        </div>
-      </Modal>
-
-      {/* Success Modal */}
-      <Modal
-        isOpen={isSuccessModalOpen}
-        onClose={() => setIsSuccessModalOpen(false)}
-        title="Action Completed"
-        footer={
-          <div style={{ display: 'flex', gap: spacing[3], width: '100%' }}>
-            <button
-              onClick={() => router.push('/')}
-              style={{
-                flex: 1,
-                backgroundColor: colors.white,
-                border: `1px solid ${colors.border}`,
-                padding: `${spacing[3]}px ${spacing[4]}px`,
-                borderRadius: 8,
-                cursor: 'pointer',
-                fontWeight: typography.fontWeights.medium,
-              }}
-            >
-              Back to Queue
-            </button>
-            <button
-              onClick={handleNextInQueue}
-              style={{
-                flex: 1,
-                backgroundColor: colors.primary[600],
-                color: colors.white,
-                border: 'none',
-                padding: `${spacing[3]}px ${spacing[4]}px`,
-                borderRadius: 8,
-                cursor: 'pointer',
-                fontWeight: typography.fontWeights.medium,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: spacing[2],
-              }}
-            >
-              Next Property <ArrowLeft size={18} style={{ transform: 'rotate(180deg)' }} />
-            </button>
-          </div>
-        }
-      >
-        <div style={{ textAlign: 'center', padding: `${spacing[4]}px 0` }}>
-          <div
             style={{
-              width: 64,
-              height: 64,
-              borderRadius: '50%',
-              backgroundColor: colors.success[100],
-              color: colors.success[500],
+              width: '100%',
+              marginTop: 40,
+              padding: '24px',
+              background: colors.primary[600],
+              color: 'white',
+              border: 'none',
+              borderRadius: 24,
+              fontWeight: 800,
+              fontSize: 18,
+              cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              margin: '0 auto ' + spacing[4] + 'px',
+              gap: 12,
             }}
           >
-            <CheckCircle2 size={32} aria-hidden="true" />
-          </div>
-          <h2
-            style={{
-              fontSize: typography.fontSizes.xl,
-              fontWeight: typography.fontWeights.bold,
-              color: colors.gray[900],
-              marginBottom: spacing[2],
-            }}
-          >
-            Submission Successful
-          </h2>
-          <p
-            style={{
-              color: colors.gray[600],
-              fontSize: typography.fontSizes.base,
-              lineHeight: 1.5,
-            }}
-          >
-            The property record has been updated and the customer has been notified. What would you
-            like to do next?
-          </p>
+            <Send size={24} /> Dispatch Request
+          </motion.button>
         </div>
       </Modal>
     </div>

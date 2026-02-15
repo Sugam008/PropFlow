@@ -96,6 +96,19 @@ export const colors = {
     900: '#111827',
     950: '#030712',
   },
+  accent: {
+    50: '#FFFBE6',
+    100: '#FFF1B8',
+    200: '#FFE58F',
+    300: '#FFD666',
+    400: '#FFC53D',
+    500: '#FAD668', // Aditya Birla Goldenrod
+    600: '#E7C845', // Aditya Birla Eureka
+    700: '#D4B106',
+    800: '#AD9100',
+    900: '#877100',
+    950: '#615100',
+  },
   white: '#FFFFFF',
   black: '#000000',
   background: '#FFFFFF',
@@ -251,8 +264,33 @@ export const gradients = {
   primary: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.primary[600]} 100%)`,
   subtle: `linear-gradient(180deg, ${colors.white} 0%, #FFF5F5 100%)`,
   warm: `linear-gradient(135deg, ${colors.primary[600]} 0%, ${colors.primary[700]} 100%)`,
-  sunrise: `linear-gradient(135deg, ${colors.primary[500]} 0%, #FF6B35 50%, #FFB347 100%)`,
+  sunrise: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.accent[500]} 100%)`,
   shimmer: `linear-gradient(90deg, ${colors.gray[100]} 0%, ${colors.gray[50]} 50%, ${colors.gray[100]} 100%)`,
+  brandHero: `linear-gradient(135deg, ${colors.primary[600]} 0%, ${colors.primary[800]} 100%)`,
+};
+
+export const glass = {
+  light: {
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    backdropFilter: 'blur(16px)',
+    border: '1px solid rgba(255, 255, 255, 0.4)',
+  },
+  dark: {
+    backgroundColor: 'rgba(17, 24, 39, 0.95)',
+    backdropFilter: 'blur(20px)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+  },
+  card: {
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    backdropFilter: 'blur(12px)',
+    border: '1px solid rgba(255, 255, 255, 0.5)',
+    boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
+  },
+  modal: {
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    backdropFilter: 'blur(24px)',
+    border: '1px solid rgba(255, 255, 255, 0.4)',
+  },
 };
 
 export const shadow = {
@@ -263,6 +301,7 @@ export const shadow = {
   lg: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
   xl: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
   '2xl': '0 35px 60px -15px rgba(0, 0, 0, 0.3)',
+  glass: '0 8px 32px 0 rgba(31, 38, 135, 0.1)',
   brand: `0 4px 14px 0 ${colors.primary[500]}33`,
   inner: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)',
   none: 'none',
@@ -312,6 +351,7 @@ export type Theme = {
   borderRadius: typeof borderRadius;
   animations: typeof animations;
   gradients: typeof gradients;
+  glass: typeof glass;
   shadow: typeof shadow;
   zIndex: typeof zIndex;
   layout: typeof layout;
@@ -324,6 +364,7 @@ export const theme: Theme = {
   borderRadius,
   animations,
   gradients,
+  glass,
   shadow,
   zIndex,
   layout,

@@ -1,26 +1,34 @@
+import { borderRadius, colors, glass, shadow, spacing, typography } from '@propflow/theme';
 import React from 'react';
-import { colors, spacing, typography, borderRadius, shadow } from '@propflow/theme';
 
 interface CardProps {
   title?: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
   style?: React.CSSProperties;
+  variant?: 'white' | 'glass';
 }
 
-export const Card = ({ title, children, footer, style }: CardProps) => {
-  return (
-    <div
-      style={
-        {
+export const Card = ({ title, children, footer, style, variant = 'white' }: CardProps) => {
+  const baseStyle =
+    variant === 'glass'
+      ? glass.card
+      : {
           backgroundColor: colors.white,
           borderRadius: borderRadius.xl,
           border: `1px solid ${colors.border}`,
           boxShadow: shadow.sm,
+        };
+
+  return (
+    <div
+      style={
+        {
+          ...baseStyle,
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
-          transition: 'box-shadow 0.2s ease',
+          transition: 'all 0.2s ease',
           ...style,
         } as React.CSSProperties
       }

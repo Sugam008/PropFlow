@@ -1,10 +1,10 @@
-import React from 'react';
-import { colors, spacing, typography, borderRadius, shadow, layout, zIndex } from '@propflow/theme';
-import { Bell, Search, Menu, LogOut } from 'lucide-react';
-import { useMediaQuery } from '../hooks/useMediaQuery';
+import { borderRadius, colors, glass, layout, spacing, typography, zIndex } from '@propflow/theme';
 import { motion } from 'framer-motion';
+import { Bell, LogOut, Menu, Search } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import React from 'react';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 import { useAuthStore } from '../store/useAuthStore';
-import { useRouter } from 'next/navigation';
 
 interface TopBarProps {
   onMenuClick?: () => void;
@@ -15,19 +15,28 @@ export const TopBar = ({ onMenuClick, pendingCount = 12 }: TopBarProps) => {
   const isMobile = useMediaQuery('(max-width: 1024px)');
   const { logout, user } = useAuthStore();
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleLogout = () => {
     logout();
     router.push('/login');
   };
 
+  const getTitle = () => {
+    if (pathname === '/completed') return 'Completed Valuations';
+    if (pathname === '/analytics') return 'Reports & Analytics';
+    if (pathname && pathname !== '/') {
+      return 'Property Details';
+    }
+    return 'Valuation Queue';
+  };
+
   return (
     <header
       style={
         {
+          ...glass.light,
           height: layout.headerHeight,
-          backgroundColor: colors.white,
-          borderBottom: `1px solid ${colors.border}`,
           padding: `0 ${isMobile ? spacing[4] : spacing[6]}px`,
           display: 'flex',
           alignItems: 'center',
@@ -35,7 +44,6 @@ export const TopBar = ({ onMenuClick, pendingCount = 12 }: TopBarProps) => {
           position: 'sticky',
           top: 0,
           zIndex: zIndex.sticky,
-          backdropFilter: 'blur(8px)',
         } as React.CSSProperties
       }
     >
@@ -75,7 +83,7 @@ export const TopBar = ({ onMenuClick, pendingCount = 12 }: TopBarProps) => {
               margin: 0,
             }}
           >
-            Valuation Queue
+            {getTitle()}
           </h1>
 
           {!isMobile && pendingCount > 0 && (

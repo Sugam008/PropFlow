@@ -1,7 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { colors } from '@propflow/theme';
+import { shadow } from '@propflow/theme';
+import { AnimatePresence, motion } from 'framer-motion';
+import { AlertCircle, CheckCircle2, Info, XCircle } from 'lucide-react';
+import { createContext, ReactNode, useCallback, useContext, useState } from 'react';
 
 type ToastType = 'success' | 'error' | 'info' | 'warning';
 
@@ -16,6 +18,20 @@ interface ToastContextType {
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
+
+const ToastIcon = ({ type }: { type: ToastType }) => {
+  switch (type) {
+    case 'success':
+      return <CheckCircle2 size={20} />;
+    case 'error':
+      return <XCircle size={20} />;
+    case 'warning':
+      return <AlertCircle size={20} />;
+    case 'info':
+    default:
+      return <Info size={20} />;
+  }
+};
 
 export const ToastProvider = ({ children }: { children: ReactNode }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -43,48 +59,48 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
           zIndex: 9999,
           display: 'flex',
           flexDirection: 'column',
-          gap: '0.5rem',
+          gap: '12px',
         }}
       >
-        {toasts.map((toast) => (
-          <div
-            key={toast.id}
-            onClick={() => removeToast(toast.id)}
-            style={{
-              padding: '1rem 1.5rem',
-              borderRadius: '0.5rem',
-              backgroundColor:
-                toast.type === 'error'
-                  ? colors.error[500]
-                  : toast.type === 'success'
-                    ? colors.success[500]
-                    : toast.type === 'warning'
-                      ? colors.warning[500]
-                      : colors.info[500],
-              color: 'white',
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-              cursor: 'pointer',
-              minWidth: '250px',
-              maxWidth: '400px',
-              animation: 'slideIn 0.3s ease-out forwards',
-            }}
-          >
-            {toast.message}
-          </div>
-        ))}
+        <AnimatePresence>
+          {toasts.map((toast) => (
+            <motion.div
+              key={toast.id}
+              initial={{ opacity: 0, x: 50, scale: 0.9 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: 20, scale: 0.95 }}
+              onClick={() => removeToast(toast.id)}
+              style={{
+                padding: '16px 20px',
+                borderRadius: '16px',
+                backgroundColor:
+                  toast.type === 'error'
+                    ? 'rgba(239, 68, 68, 0.95)'
+                    : toast.type === 'success'
+                      ? 'rgba(34, 197, 94, 0.95)'
+                      : toast.type === 'warning'
+                        ? 'rgba(245, 158, 11, 0.95)'
+                        : 'rgba(59, 130, 246, 0.95)',
+                color: 'white',
+                backdropFilter: 'blur(8px)',
+                boxShadow: shadow.lg,
+                cursor: 'pointer',
+                minWidth: '280px',
+                maxWidth: '450px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+              }}
+            >
+              <div style={{ flexShrink: 0 }}>
+                <ToastIcon type={toast.type} />
+              </div>
+              <div style={{ fontSize: '14px', fontWeight: 600 }}>{toast.message}</div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
-      <style jsx global>{`
-        @keyframes slideIn {
-          from {
-            transform: translateX(100%);
-            opacity: 0;
-          }
-          to {
-            transform: translateX(0);
-            opacity: 1;
-          }
-        }
-      `}</style>
     </ToastContext.Provider>
   );
 };

@@ -13,6 +13,8 @@ const withPWA = require('@ducanh2912/next-pwa').default({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  turbopack: {},
+  reactStrictMode: false, // Disable double-rendering in development
   images: {
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',

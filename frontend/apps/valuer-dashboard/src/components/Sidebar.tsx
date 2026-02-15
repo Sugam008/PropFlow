@@ -1,14 +1,22 @@
 'use client';
 
-import React from 'react';
-import { colors, spacing, typography, borderRadius, shadow, layout, zIndex } from '@propflow/theme';
-import { ClipboardList, CheckCircle, BarChart3, LogOut, User, X } from 'lucide-react';
+import {
+  borderRadius,
+  colors,
+  glass,
+  layout,
+  shadow,
+  spacing,
+  typography,
+  zIndex,
+} from '@propflow/theme';
+import { AnimatePresence, motion } from 'framer-motion';
+import { BarChart3, CheckCircle, ClipboardList, LogOut, X } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import React from 'react';
 import { useMediaQuery } from '../hooks/useMediaQuery';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../store/useAuthStore';
-import { useRouter } from 'next/navigation';
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -33,20 +41,20 @@ export const Sidebar = ({ isOpen = true, onClose }: SidebarProps) => {
   ];
 
   const sidebarStyle: React.CSSProperties = {
+    ...glass.dark,
     width: layout.sidebarWidth,
     height: '100vh',
-    backgroundColor: colors.gray[900],
-    color: colors.white,
     padding: `${spacing[6]}px ${spacing[4]}px`,
     display: 'flex',
     flexDirection: 'column',
-    borderRight: `1px solid ${colors.gray[800]}`,
     position: isMobile ? 'fixed' : 'sticky',
     top: 0,
     left: 0,
     zIndex: zIndex.modal,
-    boxShadow: isMobile && isOpen ? shadow['2xl'] : 'none',
+    boxShadow: isMobile && isOpen ? '0 0 50px rgba(0,0,0,0.5)' : 'none',
     overflow: 'hidden',
+    borderRight: 'none', // Remove the straight border
+    backgroundColor: 'rgba(17, 24, 39, 0.85)', // Slightly more transparent than glass.dark
   };
 
   return (
@@ -92,7 +100,7 @@ export const Sidebar = ({ isOpen = true, onClose }: SidebarProps) => {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 gap: spacing[2],
-                padding: `0 ${spacing[2]}px`,
+                padding: `0 ${spacing[4]}px`,
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: spacing[3] }}>
@@ -100,7 +108,7 @@ export const Sidebar = ({ isOpen = true, onClose }: SidebarProps) => {
                   style={{
                     width: 44,
                     height: 44,
-                    background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.primary[600]} 100%)`,
+                    background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.accent[500]} 100%)`,
                     borderRadius: borderRadius.xl,
                     display: 'flex',
                     alignItems: 'center',
@@ -110,16 +118,36 @@ export const Sidebar = ({ isOpen = true, onClose }: SidebarProps) => {
                     boxShadow: shadow.brand,
                   }}
                 >
-                  <div
-                    style={{
-                      width: '55%',
-                      height: '55%',
-                      border: '2.5px solid white',
-                      borderRadius: '50%',
-                      borderTopColor: 'transparent',
-                      transform: 'rotate(45deg)',
-                    }}
-                  />
+                  {/* Aditya Birla stylized sun rays */}
+                  <div style={{ position: 'relative', width: '70%', height: '70%' }}>
+                    {[0, 45, 90, 135].map((deg) => (
+                      <div
+                        key={deg}
+                        style={{
+                          position: 'absolute',
+                          top: '50%',
+                          left: '50%',
+                          width: '100%',
+                          height: '2px',
+                          backgroundColor: 'rgba(255,255,255,0.6)',
+                          transform: `translate(-50%, -50%) rotate(${deg}deg)`,
+                        }}
+                      />
+                    ))}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        width: '50%',
+                        height: '50%',
+                        backgroundColor: colors.white,
+                        borderRadius: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        boxShadow: '0 0 10px rgba(255,255,255,0.8)',
+                      }}
+                    />
+                  </div>
                 </div>
                 <div>
                   <div
@@ -175,7 +203,8 @@ export const Sidebar = ({ isOpen = true, onClose }: SidebarProps) => {
             <nav aria-label="Main Navigation" style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                 {menuItems.map((item, index) => {
-                  const isActive = pathname === item.href;
+                  const isActive =
+                    item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
                   const Icon = item.icon;
                   return (
                     <li key={index} style={{ marginBottom: spacing[1] }}>
@@ -198,7 +227,7 @@ export const Sidebar = ({ isOpen = true, onClose }: SidebarProps) => {
                           borderRadius: borderRadius.lg,
                           transition: 'all 0.2s ease',
                           borderLeft: isActive
-                            ? `3px solid ${colors.primary[500]}`
+                            ? `4px solid ${colors.accent[500]}`
                             : '3px solid transparent',
                         }}
                       >
@@ -216,8 +245,6 @@ export const Sidebar = ({ isOpen = true, onClose }: SidebarProps) => {
                 marginTop: 'auto',
                 borderTop: `1px solid ${colors.gray[800]}`,
                 paddingTop: spacing[5],
-                paddingLeft: spacing[2],
-                paddingRight: spacing[2],
               }}
             >
               <div
@@ -226,7 +253,7 @@ export const Sidebar = ({ isOpen = true, onClose }: SidebarProps) => {
                   alignItems: 'center',
                   gap: spacing[3],
                   marginBottom: spacing[4],
-                  padding: `${spacing[2]}px ${spacing[3]}px`,
+                  padding: `${spacing[2]}px ${spacing[4]}px`,
                 }}
               >
                 <div
