@@ -1,0 +1,154 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  AWS_REGION: ap-south-1
+  ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'staging' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push backend
+        run: |
+          cd backend
+          docker build -t $ECR_REGISTRY/propflow-backend:${{ github.sha }} .
+          docker push $ECR_REGISTRY/propflow-backend:${{ github.sha }}
+          docker tag $ECR_REGISTRY/propflow-backend:${{ github.sha }} $ECR_REGISTRY/propflow-backend:latest
+          docker push $ECR_REGISTRY/propflow-backend:latest
+
+      - name: Deploy to ECS
+        run: |
+          aws ecs update-service --cluster propflow-cluster-${{ github.event.inputs.environment || 'staging' }} \
+            --service propflow-backend \
+            --force-new-deployment
+
+  deploy-dashboard:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'staging' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push dashboard
+        run: |
+          docker build -t $ECR_REGISTRY/propflow-dashboard:${{ github.sha }} \
+            -f frontend/apps/valuer-dashboard/Dockerfile .
+          docker push $ECR_REGISTRY/propflow-dashboard:${{ github.sha }}
+          docker tag $ECR_REGISTRY/propflow-dashboard:${{ github.sha }} $ECR_REGISTRY/propflow-dashboard:latest
+          docker push $ECR_REGISTRY/propflow-dashboard:latest
+
+      - name: Deploy to ECS
+        run: |
+          aws ecs update-service --cluster propflow-cluster-${{ github.event.inputs.environment || 'staging' }} \
+            --service propflow-dashboard \
+            --force-new-deployment
+
+  build-mobile:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'staging' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 8
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build Android
+        run: |
+          cd frontend/apps/customer-app
+          eas build --platform android --profile preview --non-interactive
+
+  run-migrations:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'staging' }}
+    needs: [deploy-backend]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Run migrations
+        run: |
+          aws ecs run-task --cluster propflow-cluster-${{ github.event.inputs.environment || 'staging' }} \
+            --task-definition propflow-migrations \
+            --launch-type FARGATE
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: [deploy-backend, deploy-dashboard]
+    if: always()
+
+    steps:
+      - name: Notify on success
+        if: success()
+        run: |
+          echo "Deployment successful!"
+          # Add Slack/Teams notification here
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "Deployment failed!"
+          # Add Slack/Teams notification here

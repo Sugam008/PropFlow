@@ -1,0 +1,53 @@
+# Screen Inventory: PropFlow
+
+## Customer Mobile App (S1-S11)
+- **S1: Welcome Screen**
+  - Purpose: App landing, branding, start flow.
+  - States: Default.
+- **S2: OTP Screen**
+  - Purpose: Authentication.
+  - States: Phone Input, OTP Input, Loading (verifying), Error (invalid OTP).
+- **S3: Property Type Selection**
+  - Purpose: Select Flat/House/Plot.
+  - States: List view, Selected.
+- **S4: Property Details**
+  - Purpose: Enter address, area, floor, etc.
+  - States: Form input, Validation errors.
+- **S5: Location Capture**
+  - Purpose: GPS verification.
+  - States: Requesting permission, Fetching GPS, Success, Error (denied/timeout).
+- **S6: Photo Capture**
+  - Purpose: Native camera interface for property photos.
+  - States: Camera active, Processing image.
+- **S7: Photo Review**
+  - Purpose: Confirm quality before submission.
+  - States: Grid view, Delete/Retake.
+- **S8: Submit Confirmation**
+  - Purpose: Final review and submission.
+  - States: Summary view, Submitting (loading), Success.
+- **S9: Status Tracking**
+  - Purpose: Track valuation progress.
+  - States: Progress bar/timeline (Submitted -> Review -> Result).
+- **S10: Valuation Result**
+  - Purpose: View final valuation amount and report.
+  - States: Result display, Download PDF.
+- **S11: Follow-up Request**
+  - Purpose: Clarify or dispute result.
+  - States: Comment box, Submission.
+
+## Valuer Dashboard (V1-V5)
+- **V1: Queue Dashboard**
+  - Purpose: List of pending valuations.
+  - States: Empty, Loading, List, Search/Filter.
+- **V2: Property Review Screen**
+  - Purpose: Detailed review of submission.
+  - States: Loading, Photo gallery, Detail view.
+- **V3: Follow-up Modal**
+  - Purpose: Send message to customer.
+  - States: Input, Sending.
+- **V4: Approval/Rejection Modal**
+  - Purpose: Final decision input.
+  - States: Input (valuation amount), Confirm.
+- **V5: Completion Summary**
+  - Purpose: Post-decision confirmation.
+  - States: Success message, Next-in-queue link.

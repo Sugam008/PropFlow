@@ -1,0 +1,51 @@
+{
+  "name": "@propflow/valuer-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@ducanh2912/next-pwa": "^10.2.9",
+    "@propflow/theme": "workspace:^",
+    "@propflow/types": "workspace:^",
+    "@propflow/ui": "workspace:^",
+    "@propflow/utils": "workspace:^",
+    "@tanstack/react-query": "^5.90.21",
+    "@types/leaflet": "^1.9.21",
+    "axios": "^1.13.5",
+    "framer-motion": "^12.34.0",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^0.564.0",
+    "next": "14.1.0",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-leaflet": "^5.0.0",
+    "zustand": "^5.0.11"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.11.1",
+    "@playwright/test": "^1.58.2",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^20",
+    "@types/react": "18.2.0",
+    "@types/react-dom": "18.2.0",
+    "@vitejs/plugin-react": "^5.1.4",
+    "@vitest/coverage-v8": "^4.0.18",
+    "eslint": "^8",
+    "eslint-config-next": "14.1.0",
+    "jsdom": "^28.0.0",
+    "typescript": "^5",
+    "vitest": "^1.2.2"
+  }
+}

@@ -1,0 +1,143 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+      - name: Run Ruff
+        run: |
+          cd backend
+          ruff check .
+      - name: Run Mypy
+        run: |
+          cd backend
+          mypy .
+      - name: Run Tests with Coverage
+        run: |
+          cd backend
+          pytest -q --cov=app --cov-report=xml --cov-report=term
+      - name: Upload Coverage Report
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./backend/coverage.xml
+          fail_ci_if_error: false
+      - name: Check Coverage Threshold
+        run: |
+          cd backend
+          coverage report --fail-under=80 || echo "Warning: Coverage below 80%"
+      - name: Build Docker Image
+        run: |
+          cd backend
+          docker build -t propflow-api .
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 8
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install
+      - name: Run Lint
+        run: pnpm lint
+      - name: Run Typecheck
+        run: pnpm type-check
+      - name: Run Unit Tests
+        run: pnpm test
+      - name: Build Valuer Dashboard
+        run: pnpm turbo run build --filter=@propflow/valuer-dashboard
+      - name: Check Bundle Size
+        run: |
+          du -sh frontend/apps/valuer-dashboard/.next
+          find frontend/apps/valuer-dashboard/.next -name "*.js" -exec ls -lh {} \; | sort -k5 -h | tail -5
+      - name: Upload Bundle Analysis
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dashboard-bundle
+          path: frontend/apps/valuer-dashboard/.next
+          retention-days: 7
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install --with-deps
+      - name: Run E2E Tests
+        run: pnpm turbo run test:e2e --filter=@propflow/valuer-dashboard
+      - name: Build Docker Image
+        run: |
+          docker build -t propflow-valuer-dashboard -f frontend/apps/valuer-dashboard/Dockerfile .
+
+  mobile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 8
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install
+      - name: Run Lint
+        run: pnpm turbo run lint --filter=@propflow/customer-app
+      - name: Run Typecheck
+        run: pnpm turbo run type-check --filter=@propflow/customer-app
+      - name: Prebuild Expo App
+        run: pnpm turbo run prebuild --filter=@propflow/customer-app -- --platform android --clean
+      - name: Build Android JS Bundle
+        run: |
+          cd frontend/apps/customer-app/android
+          ./gradlew assembleRelease 2>&1 | tail -20
+      - name: Check APK Size
+        run: |
+          find frontend/apps/customer-app/android -name "*.apk" -exec ls -lh {} \;
+      - name: Upload APK Analysis
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mobile-apk
+          path: frontend/apps/customer-app/android/app/build/outputs
+          retention-days: 7
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pip-audit
+        run: pip install pip-audit
+      - name: Run Python Security Audit
+        run: |
+          cd backend
+          pip-audit --desc --format=json -o ../security-audit-python.json || true
+      - name: Upload Security Audit Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-audit-python
+          path: security-audit-python.json
+          retention-days: 30

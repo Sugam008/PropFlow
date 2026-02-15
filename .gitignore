@@ -1,0 +1,61 @@
+# Node
+node_modules/
+dist/
+.turbo/
+.next/
+out/
+build/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.env
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.benchmarks/
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Coverage
+.coverage
+coverage/
+htmlcov/
+coverage.json
+*.lcov
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Mobile
+frontend/apps/customer-app/.expo/
+frontend/apps/customer-app/android/
+frontend/apps/customer-app/ios/
+
+# E2E Testing
+playwright-report/
+test-results/
+playwright/.cache/
+
+# TypeScript
+*.tsbuildinfo
+
+# Build artifacts
+*.egg-info/
+.eggs/

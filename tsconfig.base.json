@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "baseUrl": ".",
+    "paths": {
+      "@propflow/ui": ["frontend/packages/ui/src"],
+      "@propflow/theme": ["frontend/packages/theme/src"],
+      "@propflow/types": ["frontend/packages/types/src"],
+      "@propflow/utils": ["frontend/packages/utils/src"]
+    }
+  },
+  "exclude": ["node_modules"]
+}
