@@ -11,10 +11,10 @@ from app.api import deps
 from app.core import security
 from app.core.config import settings
 from app.core.exceptions import (
-    ForbiddenException,
-    InvalidOTPException,
-    RateLimitException,
-    UnauthorizedException,
+    ForbiddenError,
+    InvalidOTPError,
+    RateLimitError,
+    UnauthorizedError,
 )
 from app.services.otp_service import otp_service
 
@@ -30,9 +30,7 @@ def request_otp(
     """
     otp = otp_service.send_otp(login_data.phone)
     if not otp:
-        raise RateLimitException(
-            detail="Too many OTP requests. Please try again later."
-        )
+        raise RateLimitError(detail="Too many OTP requests. Please try again later.")
 
     # In development, we return the OTP. In production, this would be sent via SMS.
     if settings.ENVIRONMENT == "local":
@@ -49,7 +47,7 @@ def verify_otp(
     Verify OTP and return access token. Creates user if they don't exist.
     """
     if not otp_service.verify_otp(verify_data.phone, verify_data.otp):
-        raise InvalidOTPException()
+        raise InvalidOTPError()
 
     # Check if user exists, create if not
     user = crud.user.get_by_phone(db, phone=verify_data.phone)
@@ -65,7 +63,7 @@ def verify_otp(
         user = crud.user.create(db, obj_in=user_in)
 
     if not user.is_active:
-        raise ForbiddenException(
+        raise ForbiddenError(
             detail="Inactive user",
             status_code=400,
             error_type="inactive_user",
@@ -92,13 +90,13 @@ def login_access_token(
     if not user or not security.verify_password(
         form_data.password, user.hashed_password
     ):
-        raise UnauthorizedException(
+        raise UnauthorizedError(
             detail="Incorrect phone or password",
             status_code=400,
             error_type="invalid_credentials",
         )
     elif not user.is_active:
-        raise ForbiddenException(
+        raise ForbiddenError(
             detail="Inactive user",
             status_code=400,
             error_type="inactive_user",
@@ -122,7 +120,7 @@ def refresh_access_token(refresh_data: schemas.RefreshRequest) -> Any:
             algorithms=[security.ALGORITHM],
         )
     except JWTError as exc:
-        raise UnauthorizedException(
+        raise UnauthorizedError(
             detail="Invalid refresh token",
             status_code=400,
             error_type="invalid_refresh_token",
@@ -130,7 +128,7 @@ def refresh_access_token(refresh_data: schemas.RefreshRequest) -> Any:
 
     user_id = payload.get("sub")
     if not user_id:
-        raise UnauthorizedException(
+        raise UnauthorizedError(
             detail="Invalid refresh token",
             status_code=400,
             error_type="invalid_refresh_token",

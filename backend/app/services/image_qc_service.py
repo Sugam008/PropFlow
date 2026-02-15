@@ -198,17 +198,29 @@ class ImageQCService:
         issues = qc_result.get("issues", [])
 
         if "Image is blurry" in issues:
-            return "Please retake the photo. Hold the camera steady and ensure good lighting."
+            return (
+                "Please retake the photo. "
+                "Hold the camera steady and ensure good lighting."
+            )
         elif "Image is too dark" in issues:
             return "Please retake the photo in better lighting conditions."
         elif "Image is too bright" in issues:
-            return "Please retake the photo. Avoid pointing the camera directly at bright light sources."
+            return (
+                "Please retake the photo. "
+                "Avoid pointing the camera directly at bright light sources."
+            )
         elif "Image has glare" in issues:
-            return "Please retake the photo. Avoid capturing direct sunlight or reflections."
+            return (
+                "Please retake the photo. "
+                "Avoid capturing direct sunlight or reflections."
+            )
 
         warnings = qc_result.get("warnings", [])
         if warnings:
-            return "The photo quality could be improved. You can proceed or retake for better results."
+            return (
+                "The photo quality could be improved. "
+                "You can proceed or retake for better results."
+            )
 
         return "Photo quality looks good!"
 

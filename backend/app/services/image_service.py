@@ -64,25 +64,29 @@ class ImageService:
         dphi = math.radians(lat2 - lat1)
         dlambda = math.radians(lon2 - lon1)
 
-        a = math.sin(dphi / 2)**2 + \
-            math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2)**2
+        a = (
+            math.sin(dphi / 2) ** 2
+            + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2) ** 2
+        )
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
         return r_earth * c
 
     @staticmethod
-    def optimize_image(image_path: str, max_size: tuple[int, int] = (1600, 1600), quality: int = 80) -> str:
+    def optimize_image(
+        image_path: str, max_size: tuple[int, int] = (1600, 1600), quality: int = 80
+    ) -> str:
         """Optimize image for storage and delivery by resizing and compressing."""
         try:
             img = Image.open(image_path)
-            
+
             # Convert to RGB if necessary (e.g. from RGBA)
             if img.mode in ("RGBA", "P"):
                 img = img.convert("RGB")
-            
+
             # Maintain aspect ratio while resizing
             img.thumbnail(max_size, Image.Resampling.LANCZOS)
-            
+
             # Save back to the same path or a new path if needed
             # For now, we overwrite the original
             img.save(image_path, "JPEG", quality=quality, optimize=True)
@@ -119,7 +123,7 @@ class ImageService:
             # (Note: In a real app, use OpenCV for better results)
             # This is a placeholder for basic Pillow-based check
             # For now, we'll assume it's not blurry unless it's extremely small
-            qc_results["blur_score"] = 100.0 # Placeholder
+            qc_results["blur_score"] = 100.0  # Placeholder
 
         except Exception as e:
             print(f"Error performing QC: {e}")

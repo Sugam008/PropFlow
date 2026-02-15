@@ -58,11 +58,25 @@ class SMSService:
     ) -> dict[str, Any]:
         """Send property status update notification."""
         status_messages = {
-            "SUBMITTED": f"Your property submission (Ref: {reference_id}) has been received. We'll notify you once it's under review.",
-            "UNDER_REVIEW": f"Your property (Ref: {reference_id}) is now under review by a valuer.",
-            "APPROVED": f"Great news! Your property (Ref: {reference_id}) has been approved. Check the app for valuation details.",
-            "REJECTED": f"Your property (Ref: {reference_id}) could not be approved. Please check the app for details.",
-            "FOLLOW_UP": f"Action required for your property (Ref: {reference_id}). Please check the app for details.",
+            "SUBMITTED": (
+                f"Your property submission (Ref: {reference_id}) "
+                "has been received. We'll notify you once it's under review."
+            ),
+            "UNDER_REVIEW": (
+                f"Your property (Ref: {reference_id}) is now under review by a valuer."
+            ),
+            "APPROVED": (
+                f"Great news! Your property (Ref: {reference_id}) has been approved. "
+                "Check the app for valuation details."
+            ),
+            "REJECTED": (
+                f"Your property (Ref: {reference_id}) could not be approved. "
+                "Please check the app for details."
+            ),
+            "FOLLOW_UP": (
+                f"Action required for your property (Ref: {reference_id}). "
+                "Please check the app for details."
+            ),
         }
 
         message = status_messages.get(
@@ -74,7 +88,11 @@ class SMSService:
         self, phone: str, reference_id: str, eta_hours: int = 5
     ) -> dict[str, Any]:
         """Send submission confirmation."""
-        message = f"Your property has been submitted (Ref: {reference_id}). Expected valuation within {eta_hours} hours. Track progress in the PropFlow app."
+        message = (
+            f"Your property has been submitted (Ref: {reference_id}). "
+            f"Expected valuation within {eta_hours} hours. "
+            "Track progress in the PropFlow app."
+        )
         return self.send_sms(phone, message)
 
     def send_valuation_complete(
@@ -82,7 +100,10 @@ class SMSService:
     ) -> dict[str, Any]:
         """Send valuation completion notification."""
         formatted_value = f"₹{estimated_value:,.0f}"
-        message = f"Your property valuation is complete (Ref: {reference_id}). Estimated value: {formatted_value}. View details in the PropFlow app."
+        message = (
+            f"Your property valuation is complete (Ref: {reference_id}). "
+            f"Estimated value: {formatted_value}. View details in the PropFlow app."
+        )
         return self.send_sms(phone, message)
 
 

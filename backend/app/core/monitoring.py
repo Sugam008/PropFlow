@@ -1,8 +1,9 @@
 # PropFlow Backend - Core Monitoring
 
 import sentry_sdk
-from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.celery import CeleryIntegration
+from sentry_sdk.integrations.fastapi import FastApiIntegration
+
 from app.core.config import settings
 
 

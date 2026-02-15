@@ -13,7 +13,6 @@ Usage:
     python scripts/seed.py
 """
 
-import uuid
 from datetime import datetime, timedelta
 
 from passlib.context import CryptContext
@@ -227,7 +226,10 @@ def seed_properties(db: Session, users: dict[UserRole, User]) -> list[Property]:
         property_obj = Property(
             user_id=customer.id,
             status=statuses[i],
-            description=f"Beautiful {prop_data['property_type'].value.lower()} in {prop_data['city']}",
+            description=(
+                f"Beautiful {prop_data['property_type'].value.lower()} in "
+                f"{prop_data['city']}"
+            ),
             estimated_value=prop_data["area_sqft"] * 7500,
             submitted_at=datetime.now() - timedelta(days=2) if i > 0 else None,
             reviewed_at=datetime.now() - timedelta(days=1) if i == 2 else None,
@@ -255,7 +257,7 @@ def seed_photos(db: Session, properties: list[Property]) -> None:
         PhotoType.OTHER,
     ]
 
-    for i, prop in enumerate(properties):
+    for _i, prop in enumerate(properties):
         existing_photos = (
             db.execute(
                 select(PropertyPhoto).where(PropertyPhoto.property_id == prop.id)
@@ -328,7 +330,7 @@ def seed_valuations(
 
     valuer = users[UserRole.VALUER]
 
-    for i, prop in enumerate(properties):
+    for _i, prop in enumerate(properties):
         if prop.status != PropertyStatus.UNDER_REVIEW:
             continue
 
@@ -350,7 +352,10 @@ def seed_valuations(
             comp1_id=comparables[3].id if len(comparables) > 3 else None,
             comp2_id=comparables[4].id if len(comparables) > 4 else None,
             comp3_id=None,
-            notes="Property is in good condition. Comparable properties in the area support the valuation.",
+            notes=(
+                "Property is in good condition. "
+                "Comparable properties in the area support the valuation."
+            ),
         )
         db.add(valuation)
         print(f"  Created valuation for property: {prop.address}")

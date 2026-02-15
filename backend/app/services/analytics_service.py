@@ -5,12 +5,12 @@ Tracks KPIs and business metrics
 
 from datetime import datetime, timedelta
 from typing import Any
+
+from sqlalchemy import and_, func
 from sqlalchemy.orm import Session
-from sqlalchemy import func, and_
 
 from app.models.property import Property, PropertyStatus
 from app.models.valuation import Valuation
-from app.models.audit_log import AuditLog
 
 
 class AnalyticsService:
@@ -133,18 +133,22 @@ class AnalyticsService:
         )
 
         photos_approved = (
-            self.db.execute("""
-            SELECT COUNT(*) FROM property_photos 
+            self.db.execute(
+                """
+            SELECT COUNT(*) FROM property_photos
             WHERE qc_status = 'APPROVED'
-        """).scalar()
+        """
+            ).scalar()
             or 0
         )
 
         photos_rejected = (
-            self.db.execute("""
-            SELECT COUNT(*) FROM property_photos 
+            self.db.execute(
+                """
+            SELECT COUNT(*) FROM property_photos
             WHERE qc_status = 'REJECTED'
-        """).scalar()
+        """
+            ).scalar()
             or 0
         )
 
@@ -167,25 +171,29 @@ class AnalyticsService:
         }
 
     def _calculate_avg_completion_time(self) -> float:
-        result = self.db.execute("""
+        result = self.db.execute(
+            """
             SELECT AVG(
                 EXTRACT(EPOCH FROM (submitted_at - created_at)) / 60
             ) as avg_minutes
             FROM properties
             WHERE submitted_at IS NOT NULL
             AND created_at IS NOT NULL
-        """).scalar()
+        """
+        ).scalar()
         return round(float(result or 0), 1)
 
     def _calculate_avg_review_time(self) -> float:
-        result = self.db.execute("""
+        result = self.db.execute(
+            """
             SELECT AVG(
                 EXTRACT(EPOCH FROM (reviewed_at - submitted_at)) / 3600
             ) as avg_hours
             FROM properties
             WHERE reviewed_at IS NOT NULL
             AND submitted_at IS NOT NULL
-        """).scalar()
+        """
+        ).scalar()
         return round(float(result or 0), 1)
 
     def _get_queue_age_distribution(self) -> dict[str, int]:
@@ -269,9 +277,11 @@ class AnalyticsService:
             "location_captured": self.db.query(Property)
             .filter(Property.lat.isnot(None))
             .count(),
-            "photos_uploaded": self.db.execute("""
+            "photos_uploaded": self.db.execute(
+                """
                 SELECT COUNT(DISTINCT property_id) FROM property_photos
-            """).scalar()
+            """
+            ).scalar()
             or 0,
             "submitted": self.db.query(Property)
             .filter(Property.status != PropertyStatus.DRAFT)

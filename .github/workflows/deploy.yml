@@ -22,6 +22,8 @@ jobs:
   deploy-backend:
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment || 'staging' }}
+    # Skip if AWS secrets not configured
+    if: github.secret_source != 'None'
 
     steps:
       - uses: actions/checkout@v4
@@ -54,6 +56,8 @@ jobs:
   deploy-dashboard:
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment || 'staging' }}
+    # Skip if AWS secrets not configured
+    if: github.secret_source != 'None'
 
     steps:
       - uses: actions/checkout@v4
@@ -86,6 +90,8 @@ jobs:
   build-mobile:
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment || 'staging' }}
+    # Skip if Expo token not configured
+    if: github.secret_source != 'None'
 
     steps:
       - uses: actions/checkout@v4
@@ -117,7 +123,8 @@ jobs:
   run-migrations:
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment || 'staging' }}
-    needs: [deploy-backend]
+    # Run independently - can be triggered manually
+    if: github.secret_source != 'None'
 
     steps:
       - uses: actions/checkout@v4

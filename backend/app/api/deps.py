@@ -9,7 +9,11 @@ from sqlalchemy.orm import Session
 from app import models, schemas
 from app.core import security
 from app.core.config import settings
-from app.core.exceptions import ForbiddenException, NotFoundException, UnauthorizedException
+from app.core.exceptions import (
+    ForbiddenError,
+    NotFoundError,
+    UnauthorizedError,
+)
 from app.database import SessionLocal
 
 reusable_oauth2 = OAuth2PasswordBearer(
@@ -34,11 +38,11 @@ def get_current_user(
         )
         token_data = schemas.TokenPayload(**payload)
     except (jwt.JWTError, ValidationError):
-        raise UnauthorizedException(detail="Could not validate credentials") from None
+        raise UnauthorizedError(detail="Could not validate credentials") from None
 
     user = db.query(models.User).filter(models.User.id == token_data.sub).first()
     if not user:
-        raise NotFoundException(detail="User not found")
+        raise NotFoundError(detail="User not found")
 
     return user
 
@@ -47,7 +51,7 @@ def get_current_active_user(
     current_user: models.User = Depends(get_current_user),
 ) -> models.User:
     if not current_user.is_active:
-        raise ForbiddenException(
+        raise ForbiddenError(
             detail="Inactive user",
             status_code=400,
             error_type="inactive_user",
@@ -61,7 +65,7 @@ def require_role(*roles: models.UserRole) -> Callable[[models.User], models.User
         current_user: models.User = Depends(get_current_active_user),
     ) -> models.User:
         if current_user.role not in roles:
-            raise ForbiddenException(
+            raise ForbiddenError(
                 detail="The user doesn't have enough privileges",
                 status_code=400,
                 error_type="insufficient_privileges",

@@ -33,7 +33,7 @@ def test_create_property(client: TestClient, db: Session) -> None:
         "area_sqft": 1500.0,
         "bedrooms": 3,
         "bathrooms": 2,
-        "description": "A nice test house"
+        "description": "A nice test house",
     }
     response = client.post(
         f"{settings.API_V1_STR}/properties/",
@@ -44,6 +44,7 @@ def test_create_property(client: TestClient, db: Session) -> None:
     data = response.json()
     assert data["address"] == "123 Test St"
     assert data["user_id"] == str(user.id)
+
 
 def test_read_properties_owner(client: TestClient, db: Session) -> None:
     # Create user
@@ -78,6 +79,7 @@ def test_read_properties_owner(client: TestClient, db: Session) -> None:
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 2
+
 
 def test_read_property_permissions(client: TestClient, db: Session) -> None:
     # Create two users
@@ -119,9 +121,10 @@ def test_read_property_permissions(client: TestClient, db: Session) -> None:
     assert response.status_code == 400
     assert response.json()["detail"] == "Not enough permissions"
 
+
 def test_read_properties_admin_valuer(client: TestClient, db: Session) -> None:
     from app.models.user import UserRole
-    
+
     # Create a property
     owner_phone = f"+1{str(uuid.uuid4().int)[:10]}"
     owner = crud.user.create(
@@ -141,19 +144,19 @@ def test_read_properties_admin_valuer(client: TestClient, db: Session) -> None:
     # Create Admin
     admin_phone = f"+1{str(uuid.uuid4().int)[:10]}"
     crud.user.create(
-        db, 
+        db,
         obj_in=UserCreate(
             phone=admin_phone, name="Admin", password="password", role=UserRole.ADMIN
-        )
+        ),
     )
-    
+
     # Create Valuer
     valuer_phone = f"+1{str(uuid.uuid4().int)[:10]}"
     crud.user.create(
-        db, 
+        db,
         obj_in=UserCreate(
             phone=valuer_phone, name="Valuer", password="password", role=UserRole.VALUER
-        )
+        ),
     )
 
     # Login as Admin

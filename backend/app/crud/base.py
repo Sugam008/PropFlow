@@ -5,7 +5,7 @@ from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.core.exceptions import NotFoundException
+from app.core.exceptions import NotFoundError
 from app.database import Base
 
 ModelType = TypeVar("ModelType", bound=Base)
@@ -46,7 +46,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         db: Session,
         *,
         db_obj: ModelType,
-        obj_in: UpdateSchemaType | dict[str, Any]
+        obj_in: UpdateSchemaType | dict[str, Any],
     ) -> ModelType:
         obj_data = jsonable_encoder(db_obj)
         if isinstance(obj_in, dict):
@@ -64,7 +64,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     def remove(self, db: Session, *, id: uuid.UUID) -> ModelType:
         obj = db.get(self.model, id)
         if obj is None:
-            raise NotFoundException(detail=f"{self.model.__name__} not found")
+            raise NotFoundError(detail=f"{self.model.__name__} not found")
         db.delete(obj)
         db.commit()
         return obj

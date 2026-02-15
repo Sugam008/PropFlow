@@ -64,7 +64,7 @@ def test_create_valuation(client: TestClient, db: Session) -> None:
         "confidence_score": 0.95,
         "valuation_date": datetime.now().isoformat(),
         "methodology": "comparative",
-        "notes": "Good condition property"
+        "notes": "Good condition property",
     }
     response = client.post(
         f"{settings.API_V1_STR}/valuations/",
@@ -88,6 +88,7 @@ def test_create_valuation(client: TestClient, db: Session) -> None:
     assert prop_data["estimated_value"] == 5000000.0
     assert prop_data["valuer_id"] == str(valuer.id)
 
+
 def test_read_valuations(client: TestClient, db: Session) -> None:
     # 1. Create owner and property
     owner_phone = f"+1{str(uuid.uuid4().int)[:10]}"
@@ -102,14 +103,14 @@ def test_read_valuations(client: TestClient, db: Session) -> None:
         "pincode": "123456",
         "area_sqft": 1000.0,
     }
-    
+
     # Login as owner
     response = client.post(
         f"{settings.API_V1_STR}/auth/login/access-token",
         data={"username": owner_phone, "password": "password"},
     )
     owner_token = response.json()["access_token"]
-    
+
     response = client.post(
         f"{settings.API_V1_STR}/properties/",
         json=property_in,
@@ -120,12 +121,12 @@ def test_read_valuations(client: TestClient, db: Session) -> None:
     # 2. Create valuer
     valuer_phone = f"+1{str(uuid.uuid4().int)[:10]}"
     valuer = crud.user.create(
-        db, 
+        db,
         obj_in=UserCreate(
             phone=valuer_phone, name="Valuer", password="password", role=UserRole.VALUER
-        )
+        ),
     )
-    
+
     # Login as valuer
     response = client.post(
         f"{settings.API_V1_STR}/auth/login/access-token",
@@ -140,7 +141,7 @@ def test_read_valuations(client: TestClient, db: Session) -> None:
         "confidence_score": 0.9,
         "valuation_date": datetime.now().isoformat(),
         "methodology": "market",
-        "notes": "Test read"
+        "notes": "Test read",
     }
     client.post(
         f"{settings.API_V1_STR}/valuations/",
