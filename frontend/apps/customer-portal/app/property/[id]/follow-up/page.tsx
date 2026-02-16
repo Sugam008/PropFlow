@@ -1,12 +1,12 @@
 'use client';
 
 import { colors, spacing } from '@propflow/theme';
-import { Badge, Button, Card, Input } from '@propflow/ui';
+import { Card } from '@propflow/ui';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { AlertTriangle, ArrowLeft, CheckCircle2, Send, UploadCloud } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Send, UploadCloud } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { propertyApi } from '../../../../src/api/property';
 import { useToast } from '../../../../src/providers/ToastProvider';
 

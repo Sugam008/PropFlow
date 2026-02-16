@@ -9,66 +9,105 @@ interface StepperProps {
 
 export default function Stepper({ steps, currentStep }: StepperProps) {
   return (
-    <div role="list" aria-label="Progress" style={{ width: '100%', marginBottom: '32px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <div
+      role="list"
+      aria-label="Progress"
+      style={{
+        width: '100%',
+        marginBottom: '40px',
+        padding: '0 8px',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          position: 'relative',
+        }}
+      >
+        {/* Background Line */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 14,
+            left: 0,
+            right: 0,
+            height: 2,
+            backgroundColor: 'rgba(255,255,255,0.1)',
+            zIndex: 0,
+          }}
+        />
+
         {steps.map((step, index) => {
           const isActive = index === currentStep;
           const isCompleted = index < currentStep;
-          const isLast = index === steps.length - 1;
 
           return (
             <div
               key={index}
               role="listitem"
-              style={{ display: 'flex', alignItems: 'center', flex: isLast ? 0 : 1 }}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                position: 'relative',
+                zIndex: 1,
+                flex: 1,
+              }}
             >
               <div
-                style={{ display: 'flex', alignItems: 'center' }}
-                aria-current={isActive ? 'step' : undefined}
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '50%',
+                  backgroundColor: isCompleted
+                    ? colors.success[400]
+                    : isActive
+                      ? colors.white
+                      : 'rgba(255,255,255,0.1)',
+                  border: isActive ? `4px solid ${colors.primary[400]}` : 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: isCompleted || isActive ? colors.primary[900] : 'rgba(255,255,255,0.3)',
+                  fontSize: 12,
+                  fontWeight: 800,
+                  transition: 'all 0.3s ease',
+                  boxShadow: isActive ? '0 0 20px rgba(255,255,255,0.4)' : 'none',
+                }}
               >
-                <div
-                  aria-hidden="true"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '28px',
-                    height: '28px',
-                    borderRadius: '50%',
-                    backgroundColor:
-                      isCompleted || isActive ? colors.primary[600] : colors.gray[200],
-                    color: isCompleted || isActive ? 'white' : colors.gray[500],
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    marginRight: '8px',
-                    transition: 'background-color 0.2s ease',
-                  }}
-                >
-                  {index + 1}
-                </div>
-                <span
-                  style={{
-                    fontSize: '14px',
-                    color: isActive ? colors.gray[900] : colors.gray[500],
-                    fontWeight: isActive ? 600 : 400,
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {step}
-                </span>
+                {isCompleted ? (
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                ) : (
+                  index + 1
+                )}
               </div>
-
-              {!isLast && (
-                <div
-                  style={{
-                    height: '2px',
-                    flex: 1,
-                    backgroundColor: isCompleted ? colors.primary[600] : colors.gray[200],
-                    margin: '0 12px',
-                    minWidth: '20px',
-                  }}
-                />
-              )}
+              <span
+                style={{
+                  fontSize: 10,
+                  color: isActive ? 'white' : 'rgba(255,255,255,0.4)',
+                  fontWeight: isActive ? 800 : 600,
+                  marginTop: 8,
+                  textTransform: 'uppercase',
+                  letterSpacing: 1,
+                  textAlign: 'center',
+                  display: 'block',
+                }}
+              >
+                {step}
+              </span>
             </div>
           );
         })}

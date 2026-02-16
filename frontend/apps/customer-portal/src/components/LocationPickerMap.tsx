@@ -19,12 +19,23 @@ const fixLeafletIcons = () => {
 interface LocationPickerMapProps {
   lat: number;
   lng: number;
+  userLat?: number;
+  userLng?: number;
   onLocationSelect: (lat: number, lng: number) => void;
+  zoom?: number;
 }
 
-const LocationPickerMap = ({ lat, lng, onLocationSelect }: LocationPickerMapProps) => {
+const LocationPickerMap = ({
+  lat,
+  lng,
+  userLat,
+  userLng,
+  onLocationSelect,
+  zoom = 15,
+}: LocationPickerMapProps) => {
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
+  const userMarkerRef = useRef<L.CircleMarker | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isClient, setIsClient] = useState(false);
 
@@ -37,18 +48,20 @@ const LocationPickerMap = ({ lat, lng, onLocationSelect }: LocationPickerMapProp
     if (!isClient || !containerRef.current) return;
 
     if (mapRef.current) {
-      // Just update view if map exists
-      mapRef.current.setView([lat, lng], mapRef.current.getZoom());
-      if (markerRef.current) {
-        markerRef.current.setLatLng([lat, lng]);
+      if (lat && lng) {
+        // Smoothly zoom and pan to the new location
+        mapRef.current.setView([lat, lng], zoom, { animate: true });
+        if (markerRef.current) {
+          markerRef.current.setLatLng([lat, lng]);
+        }
       }
       return;
     }
 
     try {
       const map = L.map(containerRef.current, {
-        center: [lat, lng],
-        zoom: 13,
+        center: [lat || 19.076, lng || 72.8777],
+        zoom: zoom,
         scrollWheelZoom: true,
         zoomControl: true,
         attributionControl: false,
@@ -58,8 +71,8 @@ const LocationPickerMap = ({ lat, lng, onLocationSelect }: LocationPickerMapProp
         maxZoom: 19,
       }).addTo(map);
 
-      // Draggable Marker
-      const marker = L.marker([lat, lng], {
+      // Property Marker (Draggable)
+      const marker = L.marker([lat || 19.076, lng || 72.8777], {
         draggable: true,
       }).addTo(map);
 
@@ -79,27 +92,35 @@ const LocationPickerMap = ({ lat, lng, onLocationSelect }: LocationPickerMapProp
     } catch (e) {
       console.error('Leaflet initialization failed:', e);
     }
-
-    return () => {
-      // Don't destroy map on every render, let it persist until unmount
-      // But React Strict Mode might mount/unmount.
-      // For now, let's just keep it simple.
-    };
   }, [isClient]);
+
+  // Handle user location updates
+  useEffect(() => {
+    if (mapRef.current && userLat && userLng) {
+      if (!userMarkerRef.current) {
+        const userDot = L.circleMarker([userLat, userLng], {
+          radius: 8,
+          fillColor: '#3b82f6',
+          color: 'white',
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.8,
+        }).addTo(mapRef.current);
+
+        // Add a pulsing effect via CSS class
+        userDot.getElement()?.classList.add('user-location-pulse');
+        userMarkerRef.current = userDot;
+      } else {
+        userMarkerRef.current.setLatLng([userLat, userLng]);
+      }
+    }
+  }, [userLat, userLng]);
 
   // Handle prop updates
   useEffect(() => {
     if (mapRef.current && markerRef.current) {
-      const currentCenter = mapRef.current.getCenter();
-      // Only update if significantly different to avoid loops if we update on drag
-      if (
-        Math.abs(currentCenter.lat - lat) > 0.0001 ||
-        Math.abs(currentCenter.lng - lng) > 0.0001
-      ) {
-        // mapRef.current.setView([lat, lng]);
-        // Don't auto-center on every prop change if user is dragging,
-        // but here we only receive props from parent.
-        // Let's just update marker
+      const currentPos = markerRef.current.getLatLng();
+      if (Math.abs(currentPos.lat - lat) > 0.0001 || Math.abs(currentPos.lng - lng) > 0.0001) {
         markerRef.current.setLatLng([lat, lng]);
       }
     }
@@ -130,7 +151,15 @@ const LocationPickerMap = ({ lat, lng, onLocationSelect }: LocationPickerMapProp
           .leaflet-container {
             height: 100% !important;
             width: 100% !important;
-            background: #f8fafc !important;
+            background: #111827 !important;
+          }
+          .user-location-pulse {
+            animation: pulse-blue 2s infinite;
+          }
+          @keyframes pulse-blue {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
           }
         `}
       </style>
@@ -141,7 +170,7 @@ const LocationPickerMap = ({ lat, lng, onLocationSelect }: LocationPickerMapProp
           width: '100%',
           borderRadius: '16px',
           overflow: 'hidden',
-          border: `1px solid ${colors.gray[100]}`,
+          border: '1px solid rgba(255,255,255,0.1)',
         }}
       />
     </div>

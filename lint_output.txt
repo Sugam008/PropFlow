@@ -1,0 +1,35 @@
+[STARTED] Backing up original state...
+[COMPLETED] Backed up original state in git stash (d3e3a81)
+[STARTED] Running tasks for staged files...
+[STARTED] package.json — 25 files
+[STARTED] *.{js,jsx,ts,tsx} — 21 files
+[STARTED] backend/**/*.py — 2 files
+[STARTED] *.{json,md} — 0 files
+[SKIPPED] *.{json,md} — no files
+[STARTED] eslint --fix
+[STARTED] ruff check --fix
+[FAILED] ruff check --fix [FAILED]
+[FAILED] ruff check --fix [FAILED]
+[COMPLETED] Running tasks for staged files...
+[STARTED] Applying modifications from tasks...
+[SKIPPED] Skipped because of errors from tasks.
+[STARTED] Reverting to original state because of errors...
+[FAILED] eslint --fix [SIGKILL]
+[FAILED] eslint --fix [SIGKILL]
+[COMPLETED] Reverting to original state because of errors...
+[STARTED] Cleaning up temporary files...
+[COMPLETED] Cleaning up temporary files...
+
+✖ ruff check --fix:
+backend/app/api/v1/endpoints/geocode.py:53:9: B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+backend/app/api/v1/endpoints/geocode.py:58:13: B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+backend/app/api/v1/endpoints/geocode.py:62:9: B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+backend/app/api/v1/endpoints/geocode.py:67:9: B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+backend/app/api/v1/endpoints/geocode.py:105:9: B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+backend/app/api/v1/endpoints/geocode.py:109:9: B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+backend/app/api/v1/endpoints/geocode.py:114:9: B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+Found 9 errors (2 fixed, 7 remaining).
+
+✖ eslint --fix failed to spawn:
+Command was terminated with SIGKILL: eslint --fix '/Users/sugam/AutomationEdge Projects/PropFlow/frontend/apps/customer-portal/app/new/details/page.tsx' '/Users/sugam/AutomationEdge Projects/PropFlow/frontend/apps/customer-portal/app/new/location/page.tsx' '/Users/sugam/AutomationEdge Projects/PropFlow/frontend/apps/customer-portal/app/new/page.tsx' '/Users/sugam/AutomationEdge Projects/PropFlow/frontend/apps/customer-portal/app/new/photos/page.tsx' '/Users/sugam/AutomationEdge Projects/PropFlow/frontend/apps/customer-portal/app/new/review/page.tsx' '/Users/sugam/AutomationEdge Projects/PropFlow/frontend/apps/customer-portal/app/page.tsx' '/Users/sugam/AutomationEdge Projects/PropFlow/frontend/apps/customer-portal/app/property/[id]/follow-up/page.tsx' '/Users/sugam/AutomationEdge Projects/PropFlow/frontend/apps/customer-portal/app/property/[id]/page.tsx' '/Users/sugam/AutomationEdge Projects/PropFlow/frontend/apps/customer-portal/next-env.d.ts' '/Users/sugam/AutomationEdge Projects/PropFlow/frontend/apps/customer-portal/src/api/property.ts' '/Users/sugam/AutomationEdge Projects/PropFlow/frontend/apps/customer-portal/src/components/Badge.tsx' '/Users/sugam/AutomationEdge Projects/PropFlow/frontend/apps/customer-portal/src/components/Card.tsx' '/Users/sugam/AutomationEdge Projects/PropFlow/frontend/apps/customer-portal/src/components/ClientLayout.tsx' '/Users/sugam/AutomationEdge Projects/PropFlow/frontend/apps/customer-portal/src/components/LocationPickerMap.tsx' '/Users/sugam/AutomationEdge Projects/PropFlow/frontend/apps/customer-portal/src/components/NewFlowHeader.tsx' '/Users/sugam/AutomationEdge Projects/PropFlow/frontend/apps/customer-portal/src/components/Sidebar.tsx' '/Users/sugam/AutomationEdge Projects/PropFlow/frontend/apps/customer-portal/src/components/Stepper.tsx' '/Users/sugam/AutomationEdge Projects/PropFlow/frontend/apps/customer-portal/src/components/TopBar.test.tsx' '/Users/sugam/AutomationEdge Projects/PropFlow/frontend/apps/customer-portal/src/hooks/useAddressAutocomplete.ts' '/Users/sugam/AutomationEdge Projects/PropFlow/frontend/apps/customer-portal/src/store/usePropertyStore.ts' '/Users/sugam/AutomationEdge Projects/PropFlow/frontend/apps/customer-portal/src/test/setup.ts'
+undefined

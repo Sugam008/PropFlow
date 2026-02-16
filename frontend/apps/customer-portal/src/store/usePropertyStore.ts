@@ -1,12 +1,15 @@
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 import { PropertyType } from '@propflow/types';
-import { propertyApi, CreatePropertyRequest } from '../api/property';
+import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
+import { CreatePropertyRequest, propertyApi } from '../api/property';
 
 export interface PropertyDraft {
   property_id?: string;
   property_type?: PropertyType;
   address?: string;
+  address_line1?: string;
+  address_line2?: string;
+  landmark?: string;
   city?: string;
   state?: string;
   pincode?: string;
@@ -18,6 +21,9 @@ export interface PropertyDraft {
   age?: number;
   lat?: number;
   lng?: number;
+  user_lat?: number;
+  user_lng?: number;
+  is_remote_submission?: boolean;
   photos?: string[];
 }
 
@@ -27,6 +33,7 @@ export interface PhotoItem {
   type: string;
   uploaded?: boolean;
   file?: File;
+  roomCategory?: string;
 }
 
 interface PropertyStore {
@@ -155,7 +162,7 @@ export const usePropertyStore = create<PropertyStore>()(
       partialize: (state) => ({
         draft: state.draft,
         photos: state.photos.map((p) => {
-          const { file, ...rest } = p;
+          const { file: _file, ...rest } = p;
           return rest;
         }),
         currentStep: state.currentStep,

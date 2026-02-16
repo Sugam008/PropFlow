@@ -15,6 +15,30 @@ export interface Property {
   created_at: string;
   updated_at?: string;
   user_id: string;
+  area_sqft: number;
+  bedrooms?: number;
+  bathrooms?: number;
+  floor?: number;
+  total_floors?: number;
+  age?: number;
+  description?: string;
+  submitted_at?: string;
+  reviewed_at?: string;
+  valuer_notes?: string;
+  valuer_id?: string;
+  photos?: PropertyPhoto[];
+}
+
+export interface PropertyPhoto {
+  id: string;
+  property_id: string;
+  s3_key: string;
+  s3_url: string;
+  photo_type: 'EXTERIOR' | 'INTERIOR' | 'DOCUMENT' | 'OTHER';
+  sequence: number;
+  captured_at?: string;
+  gps_lat?: number;
+  gps_lng?: number;
 }
 
 export interface CreatePropertyRequest {
@@ -59,6 +83,10 @@ export const propertyApi = {
     await apiClient.post(`/properties/${propertyId}/submit`);
   },
 
+  deleteProperty: async (propertyId: string): Promise<void> => {
+    await apiClient.delete(`/properties/${propertyId}`);
+  },
+
   getProperty: async (propertyId: string): Promise<Property> => {
     const response = await apiClient.get<Property>(`/properties/${propertyId}`);
     return response.data;
@@ -72,5 +100,19 @@ export const propertyApi = {
   getPhotos: async (propertyId: string): Promise<any[]> => {
     const response = await apiClient.get<any[]>(`/properties/${propertyId}/photos`);
     return response.data;
+  },
+
+  geocodeAddress: async (address: string): Promise<{ lat: number; lng: number } | null> => {
+    try {
+      const response = await apiClient.post<{ lat: number; lng: number }>('/geocode/geocode', {
+        address,
+      });
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        return null;
+      }
+      throw error;
+    }
   },
 };

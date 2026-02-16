@@ -4,6 +4,7 @@ from app.api.v1.endpoints import (
     analytics,
     auth,
     comps,
+    geocode,
     photos,
     properties,
     users,
@@ -19,4 +20,5 @@ api_router.include_router(photos.router, prefix="/properties", tags=["photos"])
 api_router.include_router(comps.router, prefix="/comps", tags=["comparables"])
 api_router.include_router(valuations.router, prefix="/valuations", tags=["valuations"])
 api_router.include_router(analytics.router, prefix="/analytics", tags=["analytics"])
+api_router.include_router(geocode.router, prefix="/geocode", tags=["geocode"])
 api_router.include_router(websocket.router, tags=["websocket"])

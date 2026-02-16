@@ -11,10 +11,10 @@ import {
   zIndex,
 } from '@propflow/theme';
 import { AnimatePresence, motion } from 'framer-motion';
-import { BarChart3, CheckCircle, ClipboardList, LogOut, X } from 'lucide-react';
+import { CheckCircle, ClipboardList, LogOut, Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import React from 'react';
+import React, { useState } from 'react';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { useAuthStore } from '../store/useAuthStore';
 
@@ -23,11 +23,14 @@ interface SidebarProps {
   onClose?: () => void;
 }
 
-export const Sidebar = ({ isOpen = true, onClose }: SidebarProps) => {
+export const Sidebar = ({ onClose }: SidebarProps) => {
   const pathname = usePathname();
   const isMobile = useMediaQuery('(max-width: 1024px)');
   const { logout, user } = useAuthStore();
   const router = useRouter();
+
+  // Local state for mobile hamburger menu
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -37,7 +40,6 @@ export const Sidebar = ({ isOpen = true, onClose }: SidebarProps) => {
   const menuItems = [
     { icon: ClipboardList, label: 'Home', href: '/' },
     { icon: CheckCircle, label: 'New Valuation', href: '/new' },
-    // { icon: BarChart3, label: 'Help', href: '/help' },
   ];
 
   const sidebarStyle: React.CSSProperties = {
@@ -51,22 +53,94 @@ export const Sidebar = ({ isOpen = true, onClose }: SidebarProps) => {
     top: 0,
     left: 0,
     zIndex: zIndex.modal,
-    boxShadow: isMobile && isOpen ? '0 0 50px rgba(0,0,0,0.5)' : 'none',
+    boxShadow: isMobile && isMobileMenuOpen ? '0 0 50px rgba(0,0,0,0.5)' : 'none',
     overflow: 'hidden',
-    borderRight: 'none', // Remove the straight border
-    backgroundColor: 'rgba(17, 24, 39, 0.85)', // Slightly more transparent than glass.dark
+    borderRight: 'none',
+    backgroundColor: 'rgba(17, 24, 39, 0.95)', // Increased opacity for better readability on mobile
+  };
+
+  // If mobile, we render a hamburger menu trigger instead of always showing sidebar for "isOpen" prop
+  // The "isOpen" prop from Layout might be confusing in this unified context, so we'll rely on local state for mobile
+  // But we respect onClose if provided from parent overlay click
+
+  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+    if (onClose) onClose();
   };
 
   return (
     <>
+      {/* Mobile Header Bar with Hamburger */}
+      {isMobile && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 60,
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            backdropFilter: 'blur(10px)',
+            borderBottom: `1px solid ${colors.gray[200]}`,
+            zIndex: zIndex.sticky,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: `0 ${spacing[4]}px`,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: spacing[3] }}>
+            <div
+              style={{
+                width: 32,
+                height: 32,
+                background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.accent[500]} 100%)`,
+                borderRadius: borderRadius.lg,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'relative',
+                overflow: 'hidden',
+              }}
+            >
+              {/* Mini Logo */}
+              <div
+                style={{
+                  position: 'relative',
+                  width: '60%',
+                  height: '60%',
+                  backgroundColor: 'white',
+                  borderRadius: '50%',
+                }}
+              />
+            </div>
+            <span style={{ fontWeight: 800, color: colors.gray[900], fontSize: 18 }}>PropFlow</span>
+          </div>
+
+          <button
+            onClick={toggleMobileMenu}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: spacing[2],
+              cursor: 'pointer',
+              color: colors.gray[800],
+            }}
+          >
+            <Menu size={24} />
+          </button>
+        </div>
+      )}
+
       <AnimatePresence>
-        {isMobile && isOpen && (
+        {isMobile && isMobileMenuOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            onClick={onClose}
+            onClick={closeMobileMenu}
             style={
               {
                 position: 'fixed',
@@ -84,7 +158,7 @@ export const Sidebar = ({ isOpen = true, onClose }: SidebarProps) => {
       </AnimatePresence>
 
       <AnimatePresence mode="wait">
-        {(isOpen || !isMobile) && (
+        {(!isMobile || isMobileMenuOpen) && (
           <motion.aside
             initial={isMobile ? { x: -layout.sidebarWidth } : false}
             animate={{ x: 0 }}
@@ -118,7 +192,6 @@ export const Sidebar = ({ isOpen = true, onClose }: SidebarProps) => {
                     boxShadow: shadow.brand,
                   }}
                 >
-                  {/* Aditya Birla stylized sun rays */}
                   <div style={{ position: 'relative', width: '70%', height: '70%' }}>
                     {[0, 45, 90, 135].map((deg) => (
                       <div
@@ -179,7 +252,7 @@ export const Sidebar = ({ isOpen = true, onClose }: SidebarProps) => {
                 <motion.button
                   whileHover={{ backgroundColor: colors.gray[800] }}
                   whileTap={{ scale: 0.9 }}
-                  onClick={onClose}
+                  onClick={closeMobileMenu}
                   aria-label="Close sidebar"
                   style={{
                     background: 'none',
@@ -210,7 +283,7 @@ export const Sidebar = ({ isOpen = true, onClose }: SidebarProps) => {
                     <li key={index} style={{ marginBottom: spacing[1] }}>
                       <Link
                         href={item.href}
-                        onClick={isMobile ? onClose : undefined}
+                        onClick={isMobile ? closeMobileMenu : undefined}
                         aria-current={isActive ? 'page' : undefined}
                         style={{
                           color: isActive ? colors.white : colors.gray[400],

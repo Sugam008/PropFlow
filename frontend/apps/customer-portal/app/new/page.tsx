@@ -1,119 +1,166 @@
 'use client';
 
-import { colors } from '@propflow/theme';
+import { colors, glass } from '@propflow/theme';
 import { PropertyType } from '@propflow/types';
 import { motion } from 'framer-motion';
-import { Building2, Home, Hotel, Trees, Warehouse } from 'lucide-react';
+import { ArrowRight, Building2, Home, Hotel, Trees, Warehouse } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import NewFlowHeader from '../../src/components/NewFlowHeader';
 import Stepper from '../../src/components/Stepper';
+import { useMediaQuery } from '../../src/hooks/useMediaQuery';
 import { usePropertyStore } from '../../src/store/usePropertyStore';
 
 const STEPS = ['Type', 'Details', 'Location', 'Photos', 'Review'];
 
 export default function PropertyTypePage() {
   const router = useRouter();
+  const isMobile = useMediaQuery('(max-width: 768px)');
   const { setDraft, setCurrentStep, draft } = usePropertyStore();
 
   const handleSelect = (type: PropertyType) => {
     setDraft({ property_type: type });
-    setCurrentStep(1); // Advance to Details step
+    setCurrentStep(1);
     router.push('/new/details');
   };
 
   const options = [
-    { type: PropertyType.APARTMENT, label: 'Apartment', icon: Building2 },
-    { type: PropertyType.HOUSE, label: 'House', icon: Home },
-    { type: PropertyType.VILLA, label: 'Villa', icon: Hotel },
-    { type: PropertyType.COMMERCIAL, label: 'Commercial', icon: Warehouse },
-    { type: PropertyType.LAND, label: 'Land', icon: Trees },
+    {
+      type: PropertyType.APARTMENT,
+      label: 'Apartment',
+      icon: Building2,
+      desc: 'Flats, Penthouses, Condos',
+    },
+    { type: PropertyType.HOUSE, label: 'House', icon: Home, desc: 'Individual Homes, Row Houses' },
+    { type: PropertyType.VILLA, label: 'Villa', icon: Hotel, desc: 'Luxury Villas, Bungalows' },
+    {
+      type: PropertyType.COMMERCIAL,
+      label: 'Commercial',
+      icon: Warehouse,
+      desc: 'Offices, Shops, Warehouses',
+    },
+    { type: PropertyType.LAND, label: 'Land', icon: Trees, desc: 'Residential/Commercial Plots' },
   ];
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '24px 16px' }}>
-      <h1
-        style={{ fontSize: '24px', fontWeight: 600, marginBottom: '24px', color: colors.gray[900] }}
-      >
-        New Valuation Request
-      </h1>
+    <div
+      style={{
+        minHeight: '100vh',
+        background: `linear-gradient(135deg, ${colors.primary[700]} 0%, ${colors.primary[900]} 100%)`,
+        padding: isMobile ? '20px' : '40px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+      }}
+    >
+      <div style={{ maxWidth: 800, width: '100%' }}>
+        <NewFlowHeader />
+        {/* Header Area */}
+        <div style={{ marginBottom: 40, textAlign: 'center' }}>
+          <h1
+            style={{
+              fontSize: isMobile ? 32 : 48,
+              fontWeight: 900,
+              color: 'white',
+              margin: '0 0 12px 0',
+              letterSpacing: -1.5,
+            }}
+          >
+            New <span style={{ opacity: 0.6 }}>Valuation</span>
+          </h1>
+          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 16, fontWeight: 500 }}>
+            Step 1: Define the asset category
+          </p>
+        </div>
 
-      <Stepper steps={STEPS} currentStep={0} />
+        <Stepper steps={STEPS} currentStep={0} />
 
-      <div style={{ marginTop: '32px' }}>
-        <h2
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
           style={{
-            fontSize: '18px',
-            fontWeight: 600,
-            marginBottom: '24px',
-            color: colors.gray[800],
+            ...glass.card,
+            backgroundColor: 'rgba(255,255,255,0.03)',
+            padding: isMobile ? '24px' : '40px',
+            borderRadius: 32,
+            border: '1px solid rgba(255,255,255,0.1)',
           }}
         >
-          What type of property is it?
-        </h2>
+          <h2
+            style={{
+              fontSize: 20,
+              fontWeight: 800,
+              color: 'white',
+              marginBottom: 32,
+              textAlign: isMobile ? 'left' : 'center',
+            }}
+          >
+            Select Property Type
+          </h2>
 
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
-            gap: '16px',
-          }}
-        >
-          {options.map((option) => {
-            const isSelected = draft.property_type === option.type;
-            const Icon = option.icon;
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(220px, 1fr))',
+              gap: 16,
+            }}
+          >
+            {options.map((option, idx) => {
+              const isSelected = draft.property_type === option.type;
+              const Icon = option.icon;
 
-            return (
-              <motion.button
-                key={option.type}
-                onClick={() => handleSelect(option.type)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '32px 16px',
-                  border: `2px solid ${isSelected ? colors.primary[600] : colors.gray[200]}`,
-                  borderRadius: '12px',
-                  backgroundColor: isSelected ? colors.primary[50] : 'white',
-                  cursor: 'pointer',
-                  outline: 'none',
-                  height: '100%',
-                }}
-                onMouseEnter={(e) => {
-                  if (!isSelected) e.currentTarget.style.borderColor = colors.primary[300];
-                }}
-                onMouseLeave={(e) => {
-                  if (!isSelected) e.currentTarget.style.borderColor = colors.gray[200];
-                }}
-                aria-label={`Select ${option.label}`}
-              >
-                <div
+              return (
+                <motion.button
+                  key={option.type}
+                  onClick={() => handleSelect(option.type)}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: idx * 0.05 }}
+                  whileHover={{ y: -4, backgroundColor: 'rgba(255,255,255,0.08)' }}
+                  whileTap={{ scale: 0.98 }}
                   style={{
-                    padding: '12px',
-                    borderRadius: '50%',
-                    backgroundColor: isSelected ? 'white' : colors.gray[100],
-                    marginBottom: '16px',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
+                    gap: 20,
+                    padding: '24px',
+                    border: `1.5px solid ${isSelected ? colors.white : 'rgba(255,255,255,0.1)'}`,
+                    borderRadius: 24,
+                    backgroundColor: isSelected ? 'rgba(255,255,255,0.1)' : 'transparent',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    position: 'relative',
+                    overflow: 'hidden',
                   }}
                 >
-                  <Icon size={24} color={isSelected ? colors.primary[600] : colors.gray[600]} />
-                </div>
-                <span
-                  style={{
-                    fontSize: '16px',
-                    fontWeight: 500,
-                    color: isSelected ? colors.primary[900] : colors.gray[700],
-                  }}
-                >
-                  {option.label}
-                </span>
-              </motion.button>
-            );
-          })}
-        </div>
+                  <div
+                    style={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: 14,
+                      backgroundColor: isSelected ? colors.white : 'rgba(255,255,255,0.05)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: isSelected ? colors.primary[700] : 'white',
+                    }}
+                  >
+                    <Icon size={24} />
+                  </div>
+
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: 'white' }}>
+                      {option.label}
+                    </div>
+                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
+                      {option.desc}
+                    </div>
+                  </div>
+
+                  <ArrowRight size={18} color="rgba(255,255,255,0.3)" />
+                </motion.button>
+              );
+            })}
+          </div>
+        </motion.div>
       </div>
     </div>
   );
