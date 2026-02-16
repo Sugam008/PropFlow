@@ -10,6 +10,7 @@
   ],
   "scripts": {
     "build": "tsup --config tsup.config.ts",
+    "type-check": "tsc --noEmit",
     "dev": "tsup src/index.ts --format cjs,esm --watch --dts --external react",
     "lint": "eslint src/**/*.{ts,tsx}",
     "clean": "rm -rf dist"

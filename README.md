@@ -7,7 +7,7 @@ PropFlow is an AI-powered Property Valuation and Workflow Automation platform de
 This is a monorepo managed with `pnpm` workspaces and `turborepo`.
 
 - `backend/`: FastAPI Python application.
-- `frontend/apps/customer-app/`: React Native (Expo) mobile application for customers.
+- `frontend/apps/customer-portal/`: Next.js PWA for customers.
 - `frontend/apps/valuer-dashboard/`: Next.js web application for valuers and administrators.
 - `docs/`: Architecture decisions, product requirements, and API documentation.
 - `scripts/`: Utility scripts for development and infrastructure.
@@ -15,7 +15,7 @@ This is a monorepo managed with `pnpm` workspaces and `turborepo`.
 ## Tech Stack
 
 - **Backend**: Python 3.11, FastAPI, PostgreSQL, Redis, MinIO.
-- **Frontend**: React Native (Expo), Next.js 14, Tailwind CSS.
+- **Frontend**: Next.js 14, Tailwind CSS.
 - **Infrastructure**: Docker Compose, GitHub Actions.
 - **Tooling**: PNPM, Turborepo, ESLint, Prettier, Ruff, Mypy.
 
@@ -31,16 +31,19 @@ This is a monorepo managed with `pnpm` workspaces and `turborepo`.
 ### Local Development (Manual)
 
 1. **Install dependencies**:
+
    ```bash
    pnpm install
    ```
 
 2. **Start Infrastructure**:
+
    ```bash
    docker-compose up -d db redis minio minio-init
    ```
 
 3. **Start backend API**:
+
    ```bash
    cd backend && uvicorn app.main:app --reload --port 8000
    ```

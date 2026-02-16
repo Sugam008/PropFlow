@@ -39,7 +39,7 @@ PropFlow/
 ├── frontend/
 │   ├── apps/
 │   │   ├── valuer-dashboard/   # Next.js 14 web app
-│   │   └── customer-app/       # React Native (Expo) mobile app
+│   │   └── customer-portal/    # Next.js PWA
 │   └── packages/               # Shared packages
 │       ├── theme/              # Design tokens
 │       ├── types/              # Shared TypeScript types
@@ -87,16 +87,16 @@ PropFlow/
 | Animations    | Framer Motion                        |
 | Testing       | Vitest, Playwright                   |
 
-### Frontend - Customer App
+### Customer Portal (PWA)
 
-| Component     | Technology          |
-| ------------- | ------------------- |
-| Framework     | Expo (React Native) |
-| Navigation    | React Navigation    |
-| State         | Zustand             |
-| Data Fetching | TanStack Query      |
-| Camera        | expo-camera         |
-| Location      | expo-location       |
+| Component     | Technology              |
+| ------------- | ----------------------- |
+| Framework     | Next.js 14 (App Router) |
+| Styling       | Tailwind CSS            |
+| State         | Zustand                 |
+| Data Fetching | TanStack Query          |
+| Camera        | HTML5 Media Capture     |
+| Location      | Geolocation API         |
 
 ### Infrastructure
 
@@ -212,8 +212,8 @@ cd backend && uvicorn app.main:app --reload --port 8000
 # Start valuer dashboard
 pnpm --filter @propflow/valuer-dashboard dev
 
-# Start customer app
-pnpm --filter @propflow/customer-app dev
+# Start customer portal
+pnpm --filter @propflow/customer-portal dev
 
 # Run all checks
 pnpm lint && pnpm type-check && pnpm test
@@ -254,18 +254,18 @@ pnpm --filter @propflow/valuer-dashboard test:e2e
 
 ## Key Files to Know
 
-| Purpose                 | File                                          |
-| ----------------------- | --------------------------------------------- |
-| Backend entry           | `backend/app/main.py`                         |
-| API routes              | `backend/app/api/v1/api.py`                   |
-| Database config         | `backend/app/database.py`                     |
-| Auth dependencies       | `backend/app/api/deps.py`                     |
-| Frontend entry (web)    | `frontend/apps/valuer-dashboard/app/page.tsx` |
-| Frontend entry (mobile) | `frontend/apps/customer-app/App.tsx`          |
-| Theme tokens            | `frontend/packages/theme/src/index.ts`        |
-| Shared types            | `frontend/packages/types/src/index.ts`        |
-| Docker config           | `docker-compose.yml`                          |
-| CI/CD                   | `.github/workflows/ci.yml`, `deploy.yml`      |
+| Purpose               | File                                          |
+| --------------------- | --------------------------------------------- |
+| Backend entry         | `backend/app/main.py`                         |
+| API routes            | `backend/app/api/v1/api.py`                   |
+| Database config       | `backend/app/database.py`                     |
+| Auth dependencies     | `backend/app/api/deps.py`                     |
+| Frontend entry (web)  | `frontend/apps/valuer-dashboard/app/page.tsx` |
+| Customer Portal entry | `frontend/apps/customer-portal/app/page.tsx`  |
+| Theme tokens          | `frontend/packages/theme/src/index.ts`        |
+| Shared types          | `frontend/packages/types/src/index.ts`        |
+| Docker config         | `docker-compose.yml`                          |
+| CI/CD                 | `.github/workflows/ci.yml`, `deploy.yml`      |
 
 ---
 

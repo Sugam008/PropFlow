@@ -162,23 +162,21 @@ pnpm --filter @propflow/valuer-dashboard dev
 
 Opens at http://localhost:3000
 
-### Customer App (Mobile)
+### Customer Portal (PWA)
 
 ```bash
-pnpm --filter @propflow/customer-app dev
+pnpm --filter @propflow/customer-portal dev
 ```
 
-This starts the Expo development server. You can:
+Opens at http://localhost:3001 (default) or the next available port.
 
-- Press `i` to open in iOS simulator
-- Press `a` to open in Android emulator
-- Scan QR code with Expo Go app on physical device
+This is a Next.js Progressive Web App (PWA) optimized for mobile browsers. It uses:
 
-**Note**: For mobile app to connect to local backend:
+- HTML5 Media Capture for photos
+- Geolocation API for location
+- Service Workers for offline capabilities
 
-- Android emulator: `http://10.0.2.2:8000/api/v1`
-- iOS simulator: `http://localhost:8000/api/v1`
-- Physical device: Use your machine's IP address
+**Note**: To test on a physical mobile device, access `http://<your-machine-ip>:3001` ensuring your phone is on the same network.
 
 ---
 
@@ -202,7 +200,7 @@ PropFlow/
 ├── frontend/
 │   ├── apps/
 │   │   ├── valuer-dashboard/   # Next.js web app
-│   │   └── customer-app/       # React Native mobile app
+│   │   └── customer-portal/    # Next.js PWA
 │   └── packages/
 │       ├── theme/          # Design tokens
 │       ├── types/          # Shared TypeScript types
@@ -254,8 +252,8 @@ pytest -q
 pnpm --filter @propflow/valuer-dashboard lint
 pnpm --filter @propflow/valuer-dashboard test
 
-# Customer App
-pnpm --filter @propflow/customer-app lint
+# Customer Portal
+pnpm --filter @propflow/customer-portal lint
 ```
 
 ---
@@ -315,7 +313,7 @@ turbo run lint
 | Package          | Name                         | Location                          |
 | ---------------- | ---------------------------- | --------------------------------- |
 | Valuer Dashboard | `@propflow/valuer-dashboard` | `frontend/apps/valuer-dashboard/` |
-| Customer App     | `@propflow/customer-app`     | `frontend/apps/customer-app/`     |
+| Customer Portal  | `@propflow/customer-portal`  | `frontend/apps/customer-portal/`  |
 | Theme            | `@propflow/theme`            | `frontend/packages/theme/`        |
 | Types            | `@propflow/types`            | `frontend/packages/types/`        |
 | UI               | `@propflow/ui`               | `frontend/packages/ui/`           |
@@ -325,14 +323,14 @@ turbo run lint
 
 ## Common Issues & Solutions
 
-| Issue                           | Solution                                           |
-| ------------------------------- | -------------------------------------------------- |
-| `pnpm: command not found`       | Install pnpm: `npm install -g pnpm`                |
-| Docker containers not starting  | Ensure Docker Desktop is running                   |
-| Database connection error       | Check containers: `docker-compose ps`              |
-| Python module not found         | Activate venv: `source backend/venv/bin/activate`  |
-| Port already in use             | Kill process: `lsof -i :8000` then `kill -9 <PID>` |
-| Mobile app can't connect to API | Check API_BASE_URL in .env                         |
+| Issue                          | Solution                                           |
+| ------------------------------ | -------------------------------------------------- |
+| `pnpm: command not found`      | Install pnpm: `npm install -g pnpm`                |
+| Docker containers not starting | Ensure Docker Desktop is running                   |
+| Database connection error      | Check containers: `docker-compose ps`              |
+| Python module not found        | Activate venv: `source backend/venv/bin/activate`  |
+| Port already in use            | Kill process: `lsof -i :8000` then `kill -9 <PID>` |
+| PWA features not working       | Ensure you are using HTTPS or localhost            |
 
 ---
 

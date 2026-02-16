@@ -441,10 +441,9 @@ curl http://localhost:8000/health
 # Check environment variables
 echo $NEXT_PUBLIC_API_BASE_URL
 
-# For mobile apps, check correct API URL
-# Android emulator: http://10.0.2.2:8000/api/v1
-# iOS simulator: http://localhost:8000/api/v1
+# For PWA on mobile device, use machine IP
 # Physical device: http://<machine-ip>:8000/api/v1
+# Ensure firewall allows connection on port 8000
 ```
 
 #### WebSocket disconnection
@@ -488,7 +487,7 @@ app.add_middleware(
 )
 ```
 
-### Mobile App Issues
+### PWA/Mobile Browser Issues
 
 #### Camera permission denied
 
@@ -496,20 +495,14 @@ app.add_middleware(
 
 - Camera not opening
 - Permission error
+- "NotAllowedError" in console
 
 **Solution**:
 
-```bash
-# iOS: Add to Info.plist
-<key>NSCameraUsageDescription</key>
-<string>PropFlow needs camera access to capture property photos</string>
-
-# Android: Add to AndroidManifest.xml
-<uses-permission android:name="android.permission.CAMERA" />
-
-# Request permission in app
-const { status } = await Camera.requestCameraPermissionsAsync();
-```
+- Ensure you are using HTTPS or localhost (camera requires secure context)
+- Check browser permissions for the site
+- On iOS, ensure Safari has camera access in Settings
+- Check if another app is using the camera
 
 #### Location permission denied
 
@@ -517,27 +510,20 @@ const { status } = await Camera.requestCameraPermissionsAsync();
 
 - GPS not capturing
 - Permission error
+- "User denied Geolocation"
 
 **Solution**:
 
-```bash
-# iOS: Add to Info.plist
-<key>NSLocationWhenInUseUsageDescription</key>
-<string>PropFlow needs location access for property valuation</string>
+- Check browser permissions
+- Ensure "Location Services" are enabled on device
+- Verify site is served over HTTPS (required for Geolocation)
 
-# Android: Add to AndroidManifest.xml
-<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
-# Request permission
-const { status } = await Location.requestForegroundPermissionsAsync();
-```
-
-#### App won't connect to API
+#### App won't connect to API on device
 
 **Symptoms**:
 
 - Network errors on physical device
-- Works on simulator but not device
+- Works on desktop but not mobile
 
 **Solution**:
 
@@ -546,11 +532,13 @@ const { status } = await Location.requestForegroundPermissionsAsync();
 ifconfig | grep "inet " | grep -v 127.0.0.1
 
 # Update .env
-EXPO_PUBLIC_API_BASE_URL=http://192.168.1.xxx:8000/api/v1
+NEXT_PUBLIC_API_BASE_URL=http://192.168.1.xxx:8000/api/v1
 
-# Restart Expo
-pnpm --filter @propflow/customer-app dev
+# Restart Customer Portal
+pnpm --filter @propflow/customer-portal dev
 ```
+
+Ensure your phone and computer are on the same Wi-Fi network.
 
 ---
 

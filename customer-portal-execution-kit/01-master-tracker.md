@@ -52,7 +52,7 @@ Status values:
 | 8     | Mobile decommission                     | DONE   | 2026-02-16 | 2026-02-16 |               | PASS     |
 | 9     | Polish + responsive + a11y + SEO        | DONE   | 2026-02-16 | 2026-02-16 |               | PASS     |
 | 10    | Tests + quality gates                   | DONE   | 2026-02-16 | 2026-02-16 |               | PASS     |
-| 11    | Release + rollout evidence              | DONE   | 2026-02-16 | 2026-02-16 | 8504d39       | PASS     |
+| 11    | Release + rollout evidence              | DONE   | 2026-02-16 | 2026-02-16 | 2cbfa29       | PASS     |
 
 ---
 
@@ -134,13 +134,16 @@ Record command outputs in short form. Use PASS/FAIL only.
 | 2026-02-16 | 9     | `pnpm -C frontend/apps/customer-portal type-check`                         | PASS      | Clean - SEO metadata, ARIA labels, animations |
 | 2026-02-16 | 9     | Manual: responsive e2e spec (375/768/1280)                                 | PASS      | Responsive layout verified                    |
 | 2026-02-16 | 9     | Manual: keyboard navigation and focus visibility                           | PASS      | Tab navigation, focus rings, ARIA confirmed   |
-| 2026-02-16 | 10    | `pnpm lint`                                                                | PASS      | 5 warnings (unused vars in @propflow/ui)      |
+| 2026-02-16 | 10    | `pnpm lint`                                                                | PASS      | 12 warnings (0 errors)                        |
 | 2026-02-16 | 10    | `pnpm type-check`                                                          | PASS      | Monorepo clean                                |
-| 2026-02-16 | 10    | `pnpm test`                                                                | PASS      | 27 tests pass (customer-portal)               |
+| 2026-02-16 | 10    | `pnpm test`                                                                | PASS      | 48 tests pass (monorepo-wide)                 |
 | 2026-02-16 | 10    | `pnpm build`                                                               | PASS      | All apps build successfully                   |
-| 2026-02-16 | 11    | `git rev-parse HEAD`                                                       | PASS      | Commit: 8504d39                               |
+| 2026-02-16 | 11    | `git rev-parse HEAD`                                                       | PASS      | Commit: 2cbfa29                               |
 | 2026-02-16 | 11    | `pnpm -C frontend/apps/customer-portal build`                              | PASS      | Build clean                                   |
 | 2026-02-16 | 11    | Manual: Route Verification                                                 | PASS      | All routes present                            |
+| 2026-02-16 | 11    | Staging Validation                                                         | PASS      | See: 13-staging-validation.md                 |
+| 2026-02-16 | 11    | UAT Evidence                                                               | PASS      | See: 14-uat-evidence.md                       |
+| 2026-02-16 | 11    | Rollback: `git checkout v0.9.0-legacy`                                     | PASS      | Tag: v0.9.0-legacy (pre-migration baseline)   |
 
 Evidence rule: include either command output snippet or artifact reference (screenshot/video/log path).
 
@@ -202,8 +205,10 @@ Evidence rule: include either command output snippet or artifact reference (scre
 
 ### Phase 11
 
-- [x] rollout evidence gathered
-- [x] rollback note documented
+- [x] staging validation record documented (13-staging-validation.md)
+- [x] UAT evidence documented (14-uat-evidence.md)
+- [x] rollback tag created (v0.9.0-legacy)
+- [x] release tag verified (release/customer-portal-v1.0.0)
 
 ---
 

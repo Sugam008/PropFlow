@@ -1,7 +1,8 @@
 # Release Notes - Customer Portal v1.0.0
 
 **Date:** 2026-02-16
-**Commit:** 8504d39487888c00221c1b86bc8dbc2d0483220a
+**Release Commit:** 2cbfa29e317faf1c61845c1035ed94ffaf841040
+**Release Tag:** release/customer-portal-v1.0.0
 **Builder:** Trae
 
 ## Summary
@@ -41,6 +42,13 @@ This release marks the completion of the customer portal migration, replacing th
 
 ## Rollback Plan
 
-In case of critical failure, revert to the previous stable commit or redeploy the legacy mobile app infrastructure (if not yet fully decommissioned).
-**Rollback Tag:** `v0.9.0-legacy` (hypothetical)
-**Current Stable Commit:** `8504d39487888c00221c1b86bc8dbc2d0483220a`
+In case of critical failure, revert to the previous stable commit:
+
+```bash
+git revert 2cbfa29e317faf1c61845c1035ed94ffaf841040
+# or checkout the rollback tag
+git checkout v0.9.0-legacy
+```
+
+**Rollback Tag:** `v0.9.0-legacy`
+**Rollback Commit:** `8504d39487888c00221c1b86bc8dbc2d0483220a` (pre-migration baseline)

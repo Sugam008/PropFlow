@@ -82,7 +82,7 @@ def validate_exif(image_data: bytes) -> dict:
 
 ### Fraud Prevention
 
-- **Gallery Detection**: Camera-only enforcement via expo-camera
+- **Gallery Detection**: Camera-only enforcement via HTML5 Media Capture (capture="environment")
 - **Screenshot Detection**: EXIF analysis for screenshot signatures
 - **GPS Spoofing**: Validation against property coordinates
 - **Replay Attack**: Timestamp validation prevents old photo reuse
@@ -293,4 +293,4 @@ pnpm audit --json > security/pnpm-audit.json
 - [ ] Dependencies audited
 - [ ] Penetration test passed
 
-**Approved By**: ******\_\_\_****** Date: ****\_\_\_****
+**Approved By**: **\*\***\_\_\_**\*\*** Date: \***\*\_\_\_\*\***

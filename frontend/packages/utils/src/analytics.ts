@@ -105,7 +105,7 @@ class AnalyticsTracker {
     });
   }
 
-  private async sendEvent(event: TrackingEvent) {
+  private async sendEvent(_event: TrackingEvent) {
     try {
       // Batch send events periodically
       if (this.events.length >= 10) {
@@ -124,7 +124,7 @@ class AnalyticsTracker {
 
     try {
       // In production, send to analytics API
-      console.log('Flushing analytics events:', eventsToSend.length);
+      console.warn('Flushing analytics events:', eventsToSend.length);
 
       // await fetch('/api/v1/analytics/events', {
       //   method: 'POST',

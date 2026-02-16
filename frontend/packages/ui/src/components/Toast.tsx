@@ -11,10 +11,10 @@ export interface ToastProps {
 }
 
 const typeStyles: Record<ToastType, { bg: string; border: string; icon: string }> = {
-  success: { bg: colors.white, border: colors.success, icon: '✓' },
-  error: { bg: colors.white, border: colors.error, icon: '✕' },
-  warning: { bg: colors.white, border: colors.warning, icon: '⚠' },
-  info: { bg: colors.white, border: colors.info, icon: 'ℹ' },
+  success: { bg: colors.white, border: colors.success[500], icon: '✓' },
+  error: { bg: colors.white, border: colors.error[500], icon: '✕' },
+  warning: { bg: colors.white, border: colors.warning[500], icon: '⚠' },
+  info: { bg: colors.white, border: colors.info[500], icon: 'ℹ' },
 };
 
 export const Toast: React.FC<ToastProps> = ({

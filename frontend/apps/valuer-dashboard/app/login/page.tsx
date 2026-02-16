@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { borderRadius, colors, layout, shadow, spacing, typography } from '@propflow/theme';
+import { Loader2, Lock, Phone } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { useAuthStore } from '../../src/store/useAuthStore';
-import { colors, typography, spacing, borderRadius, shadow, layout } from '@propflow/theme';
-import { LogIn, Phone, Lock, Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
   const [phone, setPhone] = useState('');
@@ -57,7 +57,7 @@ export default function LoginPage() {
             style={{
               width: 72,
               height: 72,
-              background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.primary[600]} 100%)`,
+              backgroundColor: colors.white,
               borderRadius: borderRadius.xl,
               display: 'flex',
               alignItems: 'center',
@@ -65,9 +65,19 @@ export default function LoginPage() {
               margin: '0 auto',
               marginBottom: spacing[5],
               boxShadow: shadow.brand,
+              padding: spacing[2],
+              overflow: 'hidden',
             }}
           >
-            <LogIn size={36} color={colors.white} />
+            <img
+              src="/ab-capital-logo.png"
+              alt="Aditya Birla Capital"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+              }}
+            />
           </div>
           <h1
             style={{

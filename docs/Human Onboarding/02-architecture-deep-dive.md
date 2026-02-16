@@ -11,8 +11,8 @@ This document provides a comprehensive overview of PropFlow's architecture, desi
 │                                                                          │
 │   ┌──────────────┐     ┌──────────────┐     ┌──────────────┐          │
 │   │   Customer   │     │    Valuer    │     │    Admin     │          │
-│   │     App      │     │  Dashboard   │     │   Portal     │          │
-│   │ (React Native)│     │  (Next.js)   │     │   (Future)   │          │
+│   │    Portal    │     │  Dashboard   │     │   Portal     │          │
+│   │   (Next.js)  │     │  (Next.js)   │     │   (Future)   │          │
 │   └──────┬───────┘     └──────┬───────┘     └──────┬───────┘          │
 │          │                    │                    │                   │
 │          └────────────────────┼────────────────────┘                   │
@@ -46,7 +46,7 @@ This document provides a comprehensive overview of PropFlow's architecture, desi
 
 - **Backend**: FastAPI (Python 3.11) for rapid API development, async support, automatic OpenAPI docs
 - **Web Frontend**: Next.js 14 with App Router for SEO, SSR, and modern React patterns
-- **Mobile**: React Native with Expo for cross-platform development with native capabilities
+- **Customer Portal**: Next.js PWA for cross-platform mobile access via browser
 - **Database**: PostgreSQL for relational data integrity and ACID compliance
 - **Cache/Queue**: Redis for caching, OTP storage, and Celery message broker
 - **Storage**: MinIO (dev) / S3 (prod) for photo storage
@@ -55,7 +55,7 @@ This document provides a comprehensive overview of PropFlow's architecture, desi
 
 - Strong typing with Pydantic (backend) and TypeScript (frontend)
 - Monorepo enables code sharing between web and mobile
-- Fast development cycle with hot reload across all platforms
+- Unified web stack simplifies development and sharing
 
 ### ADR-002: Monorepo Structure
 
@@ -71,7 +71,7 @@ This document provides a comprehensive overview of PropFlow's architecture, desi
 frontend/
 ├── apps/
 │   ├── valuer-dashboard/    # Next.js web app
-│   └── customer-app/        # React Native mobile app
+│   └── customer-portal/     # Next.js PWA
 └── packages/
     ├── theme/               # Design tokens
     ├── types/               # Shared TypeScript types
@@ -230,26 +230,24 @@ RootLayout
 | Client State | Zustand         | Auth, UI state                     |
 | Form State   | React Hook Form | Form handling                      |
 
-### Customer App (React Native)
+### Customer Portal (Next.js PWA)
 
-#### Navigation Structure
+#### App Router Structure
 
 ```
-AppNavigator
-├── AuthStack (if not authenticated)
-│   ├── WelcomeScreen
-│   └── OTPScreen
-│
-└── MainStack (if authenticated)
-    ├── PropertyTypeScreen
-    ├── PropertyDetailsScreen
-    ├── LocationScreen
-    ├── PhotoCaptureScreen
-    ├── PhotoReviewScreen
-    ├── SubmitScreen
-    ├── StatusScreen
-    ├── ValuationResultScreen
-    └── FollowUpScreen
+app/
+├── layout.tsx           # Root layout with providers
+├── page.tsx             # Home - Welcome / Login
+├── login/
+│   └── otp/
+│       └── page.tsx     # OTP entry
+├── property/
+│   └── [id]/
+│       ├── page.tsx     # Property details
+│       ├── photos/      # Photo capture flow
+│       └── location/    # Location capture
+└── status/
+    └── page.tsx         # Application status
 ```
 
 #### Store Structure (Zustand)

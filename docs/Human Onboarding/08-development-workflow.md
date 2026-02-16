@@ -68,7 +68,7 @@ type(scope): description
 ```
 feat(backend): add property valuation endpoint
 
-fix(mobile): resolve GPS permission issue on Android
+fix(pwa): resolve Geolocation API issue on Android Chrome
 
 docs(onboarding): add troubleshooting section
 ```
@@ -115,6 +115,7 @@ cd backend && ruff check . && mypy . && pytest
 
 # Frontend specific
 pnpm --filter @propflow/valuer-dashboard test
+pnpm --filter @propflow/customer-portal test
 ```
 
 ### 4. Push & Create PR
@@ -613,6 +614,7 @@ alembic upgrade head
 
 # Frontend
 pnpm --filter @propflow/valuer-dashboard dev
+pnpm --filter @propflow/customer-portal dev
 pnpm --filter @propflow/valuer-dashboard test
 pnpm --filter @propflow/valuer-dashboard test:e2e
 

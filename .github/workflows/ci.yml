@@ -86,41 +86,6 @@ jobs:
         run: |
           docker build -t propflow-valuer-dashboard -f frontend/apps/valuer-dashboard/Dockerfile .
 
-  mobile:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 8
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-      - name: Install dependencies
-        run: pnpm install
-      - name: Run Lint
-        run: pnpm turbo run lint --filter=@propflow/customer-app
-      - name: Run Typecheck
-        run: pnpm turbo run type-check --filter=@propflow/customer-app
-      - name: Prebuild Expo App
-        run: pnpm turbo run prebuild --filter=@propflow/customer-app -- --platform android --clean
-      - name: Build Android JS Bundle
-        run: |
-          cd frontend/apps/customer-app/android
-          ./gradlew assembleRelease 2>&1 | tail -20
-      - name: Check APK Size
-        run: |
-          find frontend/apps/customer-app/android -name "*.apk" -exec ls -lh {} \;
-      - name: Upload APK Analysis
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: mobile-apk
-          path: frontend/apps/customer-app/android/app/build/outputs
-          retention-days: 7
-
   security:
     runs-on: ubuntu-latest
     steps:

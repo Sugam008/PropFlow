@@ -121,51 +121,6 @@ jobs:
           echo "docker-compose -f docker-compose.prod.yml up -d" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
-  build-mobile-local:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 8
-
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Prebuild Expo app
-        run: |
-          cd frontend/apps/customer-app
-          npx expo prebuild --platform android --clean
-
-      - name: Build Android APK locally
-        run: |
-          cd frontend/apps/customer-app/android
-          ./gradlew assembleRelease 2>&1 | tail -30
-
-      - name: Find and upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: customer-app-apk
-          path: frontend/apps/customer-app/android/app/build/outputs/apk/release/*.apk
-          retention-days: 7
-          if-no-files-found: warn
-
-      - name: Summary
-        run: |
-          echo "## Mobile Build Complete" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "APK built successfully (if found)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Download the APK from the artifacts section." >> $GITHUB_STEP_SUMMARY
-
   run-migrations-local:
     runs-on: ubuntu-latest
     needs: [build-and-push-local]

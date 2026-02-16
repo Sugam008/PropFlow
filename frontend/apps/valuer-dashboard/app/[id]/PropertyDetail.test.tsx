@@ -38,12 +38,13 @@ vi.mock('../../src/api/properties', () => ({
 }));
 
 vi.mock('../../src/components/Modal', () => ({
-  Modal: ({ isOpen, title, children }: any) => isOpen ? (
-    <div data-testid="mock-modal">
-      <h2>{title}</h2>
-      {children}
-    </div>
-  ) : null,
+  Modal: ({ isOpen, title, children }: any) =>
+    isOpen ? (
+      <div data-testid="mock-modal">
+        <h2>{title}</h2>
+        {children}
+      </div>
+    ) : null,
 }));
 
 vi.mock('next/dynamic', () => ({
@@ -79,7 +80,7 @@ describe('PropertyDetail Page', () => {
     property_type: 'APARTMENT',
     status: 'SUBMITTED',
     created_at: new Date().toISOString(),
-    user_id: 'user_1'
+    user_id: 'user_1',
   };
 
   beforeEach(() => {
@@ -87,7 +88,7 @@ describe('PropertyDetail Page', () => {
     (useParams as any).mockReturnValue({ id: 'prop_1' });
     (useRouter as any).mockReturnValue({ push: mockPush });
     (useToast as any).mockReturnValue({ showToast: mockShowToast });
-    
+
     // Default implementation for useQuery
     (useQuery as any).mockImplementation(({ queryKey }: any) => {
       if (queryKey[0] === 'property') return { data: mockProperty, isLoading: false };
@@ -109,7 +110,7 @@ describe('PropertyDetail Page', () => {
 
   it('renders property details correctly', () => {
     render(<PropertyDetailPage />);
-    
+
     expect(screen.getAllByText('123 Main St').length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Mumbai/).length).toBeGreaterThan(0);
     expect(screen.getByText('APARTMENT')).toBeDefined();
@@ -117,29 +118,29 @@ describe('PropertyDetail Page', () => {
 
   it('renders action buttons', () => {
     render(<PropertyDetailPage />);
-    expect(screen.getByText(/Approve Valuation/i)).toBeDefined();
-    expect(screen.getByText(/Request Follow-up/i)).toBeDefined();
+    expect(screen.getByText(/Finalize Value/i)).toBeDefined();
+    expect(screen.getByText(/Review/i)).toBeDefined();
   });
 
   it('opens valuation modal on button click', async () => {
     const user = userEvent.setup();
     render(<PropertyDetailPage />);
-    
-    const approveButton = screen.getByRole('button', { name: /Approve Valuation/i });
+
+    const approveButton = screen.getByRole('button', { name: /Finalize Value/i });
     await user.click(approveButton);
-    
+
     expect(await screen.findByTestId('mock-modal')).toBeDefined();
-    expect(screen.getByText(/Submit Valuation/i)).toBeDefined();
+    expect(screen.getByText(/Submit Final Value/i)).toBeDefined();
   });
 
   it('opens follow-up modal on button click', async () => {
     const user = userEvent.setup();
     render(<PropertyDetailPage />);
-    
-    const followUpButton = screen.getByRole('button', { name: /Request Follow-up/i });
+
+    const followUpButton = screen.getByRole('button', { name: /Review/i });
     await user.click(followUpButton);
-    
+
     expect(await screen.findByTestId('mock-modal')).toBeDefined();
-    expect(screen.getAllByText(/Request Follow-up/i).length).toBeGreaterThan(1);
+    expect(screen.getByText(/Request Follow-up/i)).toBeDefined();
   });
 });

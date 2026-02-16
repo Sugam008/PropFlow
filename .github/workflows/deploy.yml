@@ -87,39 +87,6 @@ jobs:
             --service propflow-dashboard \
             --force-new-deployment
 
-  build-mobile:
-    runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment || 'staging' }}
-    # Skip if Expo token not configured
-    if: github.secret_source != 'None'
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 8
-
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Setup EAS
-        uses: expo/expo-github-action@v8
-        with:
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
-
-      - name: Build Android
-        run: |
-          cd frontend/apps/customer-app
-          eas build --platform android --profile preview --non-interactive
-
   run-migrations:
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment || 'staging' }}

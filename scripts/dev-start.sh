@@ -51,8 +51,8 @@ cd ..
 
 # 7. Frontend environment
 echo "💻 Setting up frontend environment..."
-if [ ! -f frontend/apps/customer-app/.env ]; then
-    cp frontend/apps/customer-app/.env.example frontend/apps/customer-app/.env
+if [ ! -f frontend/apps/customer-portal/.env ]; then
+    cp frontend/apps/customer-portal/.env.example frontend/apps/customer-portal/.env
 fi
 if [ ! -f frontend/apps/valuer-dashboard/.env ]; then
     cp frontend/apps/valuer-dashboard/.env.example frontend/apps/valuer-dashboard/.env

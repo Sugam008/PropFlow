@@ -18,9 +18,7 @@ cd backend && uvicorn app.main:app --reload --port 8000
 
 # Frontend (Web)
 pnpm --filter @propflow/valuer-dashboard dev
-
-# Frontend (Mobile)
-pnpm --filter @propflow/customer-app dev
+pnpm --filter @propflow/customer-portal dev
 ```
 
 ### Quality Checks
@@ -105,11 +103,6 @@ AWS_SECRET_ACCESS_KEY=minioadmin
 # Valuer Dashboard
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api/v1
 NEXT_PUBLIC_WS_URL=ws://localhost:8000/ws
-
-# Customer App
-EXPO_PUBLIC_API_BASE_URL=http://localhost:8000/api/v1
-# Android emulator: http://10.0.2.2:8000/api/v1
-# Physical device: http://<machine-ip>:8000/api/v1
 ```
 
 ---
@@ -260,22 +253,22 @@ const { value, setValue } = useStore();
 
 ## File Locations
 
-| Purpose           | Location                                  |
-| ----------------- | ----------------------------------------- |
-| Backend entry     | `backend/app/main.py`                     |
-| API routes        | `backend/app/api/v1/endpoints/`           |
-| Database models   | `backend/app/models/`                     |
-| Schemas           | `backend/app/schemas/`                    |
-| Services          | `backend/app/services/`                   |
-| Tests             | `backend/app/tests/`                      |
-| Web app pages     | `frontend/apps/valuer-dashboard/app/`     |
-| Mobile screens    | `frontend/apps/customer-app/src/screens/` |
-| Shared components | `frontend/packages/ui/src/components/`    |
-| Design tokens     | `frontend/packages/theme/src/index.ts`    |
-| Shared types      | `frontend/packages/types/src/index.ts`    |
-| Docker config     | `docker-compose.yml`                      |
-| CI/CD             | `.github/workflows/`                      |
-| Terraform         | `infrastructure/main.tf`                  |
+| Purpose           | Location                               |
+| ----------------- | -------------------------------------- |
+| Backend entry     | `backend/app/main.py`                  |
+| API routes        | `backend/app/api/v1/endpoints/`        |
+| Database models   | `backend/app/models/`                  |
+| Schemas           | `backend/app/schemas/`                 |
+| Services          | `backend/app/services/`                |
+| Tests             | `backend/app/tests/`                   |
+| Web app pages     | `frontend/apps/valuer-dashboard/app/`  |
+| Customer pages    | `frontend/apps/customer-portal/app/`   |
+| Shared components | `frontend/packages/ui/src/components/` |
+| Design tokens     | `frontend/packages/theme/src/index.ts` |
+| Shared types      | `frontend/packages/types/src/index.ts` |
+| Docker config     | `docker-compose.yml`                   |
+| CI/CD             | `.github/workflows/`                   |
+| Terraform         | `infrastructure/main.tf`               |
 
 ---
 

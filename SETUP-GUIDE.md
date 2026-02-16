@@ -19,4 +19,4 @@ Then run:
 
 - Backend: `uvicorn app.main:app --reload --port 8000` (from `backend/`)
 - Valuer Dashboard: `pnpm --filter @propflow/valuer-dashboard dev`
-- Customer App: `pnpm --filter @propflow/customer-app dev`
+- Customer Portal: `pnpm --filter @propflow/customer-portal dev`

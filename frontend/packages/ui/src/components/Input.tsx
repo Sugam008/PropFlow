@@ -22,14 +22,14 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     const labelStyle: React.CSSProperties = {
       fontSize: typography.fontSizes.sm,
       fontWeight: typography.fontWeights.medium,
-      color: hasError ? colors.error : colors.gray[700],
+      color: hasError ? colors.error[500] : colors.gray[700],
     };
 
     const inputContainerStyle: React.CSSProperties = {
       display: 'flex',
       alignItems: 'center',
       borderRadius: borderRadius.md,
-      border: `1px solid ${hasError ? colors.error : colors.border}`,
+      border: `1px solid ${hasError ? colors.error[500] : colors.border}`,
       backgroundColor: colors.input,
       padding: `${spacing[2]}px ${spacing[3]}px`,
       transition: 'border-color 0.2s, box-shadow 0.2s',
@@ -57,7 +57,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 
     const hintStyle: React.CSSProperties = {
       fontSize: typography.fontSizes.xs,
-      color: hasError ? colors.error : colors.gray[500],
+      color: hasError ? colors.error[500] : colors.gray[500],
     };
 
     return (

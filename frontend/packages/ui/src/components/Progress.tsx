@@ -20,9 +20,9 @@ export const Progress: React.FC<ProgressProps> = ({
 
   const colorMap = {
     primary: colors.primary[500],
-    success: colors.success,
-    warning: colors.warning,
-    error: colors.error,
+    success: colors.success[500],
+    warning: colors.warning[500],
+    error: colors.error[500],
   };
 
   const sizeMap = {

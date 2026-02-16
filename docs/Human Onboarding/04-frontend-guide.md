@@ -1,14 +1,14 @@
 # Frontend Development Guide
 
-This guide covers frontend development for PropFlow, including the Valuer Dashboard (Next.js) and Customer App (React Native).
+This guide covers frontend development for PropFlow, including the Valuer Dashboard (Next.js) and Customer Portal (Next.js PWA).
 
 ## Monorepo Structure
 
 ```
 frontend/
 ├── apps/
-│   ├── valuer-dashboard/      # Next.js 14 web app
-│   └── customer-app/          # React Native (Expo) mobile app
+│   ├── valuer-dashboard/      # Next.js 14 web app (Valuer/Admin)
+│   └── customer-portal/       # Next.js 14 PWA (Customer)
 └── packages/
     ├── theme/                 # Design tokens (colors, spacing, typography)
     ├── types/                 # Shared TypeScript types
@@ -386,280 +386,42 @@ export function useKeyboardNavigation() {
 
 ---
 
-## Customer App (React Native)
+## Customer Portal (Next.js PWA)
 
-### Technology Stack
+The Customer Portal is a Progressive Web App (PWA) built with Next.js 14, sharing the same technology stack and architectural patterns as the Valuer Dashboard.
 
-| Component     | Technology                      |
-| ------------- | ------------------------------- |
-| Framework     | Expo (React Native)             |
-| Navigation    | React Navigation (Native Stack) |
-| State         | Zustand                         |
-| Data Fetching | TanStack Query                  |
-| Camera        | expo-camera                     |
-| Location      | expo-location                   |
-| Animations    | React Native Reanimated         |
+### Key Differences from Dashboard
+
+- **Mobile-First Design**: UI is optimized for touch targets and small screens.
+- **PWA Capabilities**: Service workers for offline capabilities and installation.
+- **Simplified Flow**: Linear wizard-based interface for property submission.
 
 ### Project Structure
 
 ```
-customer-app/
-├── App.tsx                   # Entry point
-├── src/
-│   ├── navigation/
-│   │   └── AppNavigator.tsx  # Navigation setup
-│   ├── screens/              # Screen components
-│   ├── components/           # Reusable components
-│   ├── store/                # Zustand stores
-│   ├── api/                  # API clients
-│   ├── hooks/                # Custom hooks
-│   └── utils/                # Utilities
-├── app.json                  # Expo config
-└── package.json
-```
-
-### Navigation Setup
-
-```tsx
-// src/navigation/AppNavigator.tsx
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useAuthStore } from '@/store/useAuthStore';
-
-const Stack = createNativeStackNavigator();
-
-export function AppNavigator() {
-  const { isAuthenticated } = useAuthStore();
-
-  return (
-    <NavigationContainer>
-      <Stack.Navigator>
-        {!isAuthenticated ? (
-          <>
-            <Stack.Screen name="Welcome" component={WelcomeScreen} />
-            <Stack.Screen name="OTP" component={OTPScreen} />
-          </>
-        ) : (
-          <>
-            <Stack.Screen name="PropertyType" component={PropertyTypeScreen} />
-            <Stack.Screen name="PropertyDetails" component={PropertyDetailsScreen} />
-            <Stack.Screen name="Location" component={LocationScreen} />
-            <Stack.Screen name="PhotoCapture" component={PhotoCaptureScreen} />
-            <Stack.Screen name="PhotoReview" component={PhotoReviewScreen} />
-            <Stack.Screen name="Submit" component={SubmitScreen} />
-            <Stack.Screen name="Status" component={StatusScreen} />
-          </>
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
-}
-```
-
-### Screen Pattern
-
-```tsx
-// src/screens/PropertyTypeScreen.tsx
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { colors, spacing, typography } from '@propflow/theme';
-
-const PROPERTY_TYPES = ['APARTMENT', 'HOUSE', 'VILLA', 'COMMERCIAL', 'LAND'];
-
-export function PropertyTypeScreen() {
-  const navigation = useNavigation();
-  const { setPropertyType } = usePropertyStore();
-
-  const handleSelect = (type: string) => {
-    setPropertyType(type);
-    navigation.navigate('PropertyDetails');
-  };
-
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Select Property Type</Text>
-      {PROPERTY_TYPES.map((type) => (
-        <TouchableOpacity key={type} style={styles.typeButton} onPress={() => handleSelect(type)}>
-          <Text style={styles.typeText}>{type}</Text>
-        </TouchableOpacity>
-      ))}
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.white,
-    padding: spacing.lg,
-  },
-  title: {
-    fontSize: typography.fontSizes['2xl'],
-    fontWeight: typography.fontWeights.bold,
-    marginBottom: spacing.xl,
-  },
-  typeButton: {
-    padding: spacing.lg,
-    backgroundColor: colors.gray[100],
-    borderRadius: spacing.md,
-    marginBottom: spacing.md,
-  },
-  typeText: {
-    fontSize: typography.fontSizes.lg,
-    color: colors.gray[900],
-  },
-});
-```
-
-### Zustand Store with Persistence
-
-```tsx
-// src/store/usePropertyStore.ts
-import { create } from 'zustand';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-interface PropertyState {
-  propertyType: string | null;
-  address: string;
-  areaSqft: number | null;
-  photos: PropertyPhoto[];
-
-  setPropertyType: (type: string) => void;
-  setAddress: (address: string) => void;
-  addPhoto: (photo: PropertyPhoto) => void;
-  removePhoto: (id: string) => void;
-  reset: () => void;
-}
-
-const STORAGE_KEY = '@propflow_property_draft';
-
-export const usePropertyStore = create<PropertyState>((set, get) => ({
-  propertyType: null,
-  address: '',
-  areaSqft: null,
-  photos: [],
-
-  setPropertyType: (type) => {
-    set({ propertyType: type });
-    saveDraft(get());
-  },
-
-  setAddress: (address) => {
-    set({ address });
-    saveDraft(get());
-  },
-
-  addPhoto: (photo) => {
-    set((state) => ({ photos: [...state.photos, photo] }));
-    saveDraft(get());
-  },
-
-  removePhoto: (id) => {
-    set((state) => ({
-      photos: state.photos.filter((p) => p.id !== id),
-    }));
-    saveDraft(get());
-  },
-
-  reset: () => {
-    set({ propertyType: null, address: '', areaSqft: null, photos: [] });
-    AsyncStorage.removeItem(STORAGE_KEY);
-  },
-}));
-
-// Auto-save draft every 30 seconds
-async function saveDraft(state: PropertyState) {
-  await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
-
-// Load draft on app start
-export async function loadDraft() {
-  const saved = await AsyncStorage.getItem(STORAGE_KEY);
-  if (saved) {
-    usePropertyStore.setState(JSON.parse(saved));
-  }
-}
+customer-portal/
+├── app/                      # Next.js App Router
+│   ├── login/               # Authentication
+│   ├── new/                 # Submission Wizard
+│   │   ├── details/
+│   │   ├── location/
+│   │   ├── photos/
+│   │   └── review/
+│   └── property/            # Property status & results
+└── src/
+    ├── components/          # App-specific components
+    ├── api/                 # API clients
+    ├── store/               # Zustand stores
+    └── hooks/               # Custom hooks
 ```
 
 ### Camera Integration
 
-```tsx
-// src/screens/PhotoCaptureScreen.tsx
-import { CameraView, useCameraPermissions } from 'expo-camera';
-import { useState } from 'react';
-import { View, TouchableOpacity, Text } from 'react-native';
-
-export function PhotoCaptureScreen() {
-  const [permission, requestPermission] = useCameraPermissions();
-  const [camera, setCamera] = useState<CameraView>(null);
-
-  const takePhoto = async () => {
-    if (!camera) return;
-
-    const photo = await camera.takePictureAsync({
-      quality: 0.8,
-      exif: true, // Capture EXIF metadata
-    });
-
-    // Photo.uri contains local file path
-    // Photo.exif contains metadata (GPS, timestamp, device)
-    addPhoto({
-      id: generateId(),
-      uri: photo.uri,
-      exif: photo.exif,
-    });
-  };
-
-  if (!permission?.granted) {
-    return (
-      <View>
-        <Text>Camera permission required</Text>
-        <TouchableOpacity onPress={requestPermission}>
-          <Text>Grant Permission</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
-  return (
-    <CameraView style={{ flex: 1 }} ref={setCamera}>
-      <TouchableOpacity onPress={takePhoto}>
-        <Text>Capture</Text>
-      </TouchableOpacity>
-    </CameraView>
-  );
-}
-```
+The portal uses HTML5 Media Capture API and file inputs for photo uploads, enforcing camera capture on mobile devices where supported.
 
 ### Location Services
 
-```tsx
-// src/hooks/useLocation.ts
-import * as Location from 'expo-location';
-import { useState } from 'react';
-
-export function useLocation() {
-  const [location, setLocation] = useState<LocationObject | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const requestLocation = async () => {
-    const { status } = await Location.requestForegroundPermissionsAsync();
-
-    if (status !== 'granted') {
-      setError('Location permission denied');
-      return;
-    }
-
-    const position = await Location.getCurrentPositionAsync({
-      accuracy: Location.Accuracy.High,
-    });
-
-    setLocation(position);
-  };
-
-  return { location, error, requestLocation };
-}
-```
+Uses browser Geolocation API and interactive maps (Leaflet) for property location confirmation.
 
 ---
 
@@ -674,19 +436,13 @@ NEXTAUTH_SECRET=your-secret-key
 NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your-token
 ```
 
-### Customer App (`.env`)
+### Customer Portal (`.env`)
 
 ```bash
-EXPO_PUBLIC_API_BASE_URL=http://localhost:8000/api/v1
-EXPO_PUBLIC_WS_URL=ws://localhost:8000/ws
-EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN=your-token
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api/v1
+NEXT_PUBLIC_WS_URL=ws://localhost:8000/ws
+NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your-token
 ```
-
-**Mobile-Specific Notes:**
-
-- Android emulator: Use `http://10.0.2.2:8000/api/v1`
-- iOS simulator: Use `http://localhost:8000/api/v1`
-- Physical device: Use machine's IP (e.g., `http://192.168.1.x:8000/api/v1`)
 
 ---
 
@@ -700,11 +456,11 @@ pnpm --filter @propflow/valuer-dashboard lint
 pnpm --filter @propflow/valuer-dashboard test
 pnpm --filter @propflow/valuer-dashboard test:e2e
 
-# Customer App
-pnpm --filter @propflow/customer-app dev
-pnpm --filter @propflow/customer-app start   # Expo start
-pnpm --filter @propflow/customer-app android # Run on Android
-pnpm --filter @propflow/customer-app ios     # Run on iOS
+# Customer Portal
+pnpm --filter @propflow/customer-portal dev
+pnpm --filter @propflow/customer-portal build
+pnpm --filter @propflow/customer-portal lint
+pnpm --filter @propflow/customer-portal type-check
 ```
 
 ---

@@ -17,12 +17,12 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 
 const variantStyles: Record<BadgeVariant, { bg: string; color: string }> = {
   default: { bg: colors.gray[100], color: colors.gray[700] },
-  success: { bg: colors.successLight, color: colors.success },
-  warning: { bg: colors.warningLight, color: colors.warning },
-  error: { bg: colors.errorLight, color: colors.error },
-  info: { bg: colors.infoLight, color: colors.info },
-  pending: { bg: colors.warningLight, color: colors.warning },
-  review: { bg: colors.infoLight, color: colors.info },
+  success: { bg: colors.success[100], color: colors.success[700] },
+  warning: { bg: colors.warning[100], color: colors.warning[700] },
+  error: { bg: colors.error[100], color: colors.error[700] },
+  info: { bg: colors.info[100], color: colors.info[700] },
+  pending: { bg: colors.warning[100], color: colors.warning[700] },
+  review: { bg: colors.info[100], color: colors.info[700] },
 };
 
 export const Badge: React.FC<BadgeProps> = ({

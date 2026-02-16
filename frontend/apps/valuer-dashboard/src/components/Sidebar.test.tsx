@@ -30,6 +30,7 @@ vi.mock('next/link', () => ({
 vi.mock('@propflow/theme', () => ({
   colors: {
     primary: { 500: '#E31E24', 600: '#B81B20' },
+    accent: { 500: '#3B82F6' },
     white: '#FFFFFF',
     gray: {
       50: '#F9FAFB',
@@ -61,6 +62,10 @@ vi.mock('@propflow/theme', () => ({
   shadow: { '2xl': '0 35px 60px -15px rgba(0, 0, 0, 0.3)', brand: 'none' },
   layout: { sidebarWidth: 280 },
   zIndex: { modal: 50, modalBackdrop: 40 },
+  glass: {
+    dark: { background: 'rgba(17, 24, 39, 0.95)', backdropFilter: 'blur(20px)' },
+    light: { background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(20px)' },
+  },
 }));
 
 describe('Sidebar', () => {

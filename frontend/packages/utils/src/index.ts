@@ -133,7 +133,7 @@ export const formatDuration = (minutes: number): string => {
  * Accepts: +91XXXXXXXXXX, 91XXXXXXXXXX, XXXXXXXXXX (10 digits)
  */
 export const isValidIndianPhone = (phone: string): boolean => {
-  const cleaned = phone.replace(/[\s\-\(\)]/g, '');
+  const cleaned = phone.replace(/[\s\-()]/g, '');
   const regex = /^(\+?91|0)?[6-9]\d{9}$/;
   return regex.test(cleaned);
 };

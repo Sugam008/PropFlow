@@ -118,36 +118,17 @@ export const Sidebar = ({ isOpen = true, onClose }: SidebarProps) => {
                     boxShadow: shadow.brand,
                   }}
                 >
-                  {/* Aditya Birla stylized sun rays */}
-                  <div style={{ position: 'relative', width: '70%', height: '70%' }}>
-                    {[0, 45, 90, 135].map((deg) => (
-                      <div
-                        key={deg}
-                        style={{
-                          position: 'absolute',
-                          top: '50%',
-                          left: '50%',
-                          width: '100%',
-                          height: '2px',
-                          backgroundColor: 'rgba(255,255,255,0.6)',
-                          transform: `translate(-50%, -50%) rotate(${deg}deg)`,
-                        }}
-                      />
-                    ))}
-                    <div
-                      style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        width: '50%',
-                        height: '50%',
-                        backgroundColor: colors.white,
-                        borderRadius: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        boxShadow: '0 0 10px rgba(255,255,255,0.8)',
-                      }}
-                    />
-                  </div>
+                  <img
+                    src="/ab-capital-logo.png"
+                    alt="Aditya Birla Capital"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'contain',
+                      backgroundColor: 'white',
+                      padding: '4px',
+                    }}
+                  />
                 </div>
                 <div>
                   <div
