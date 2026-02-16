@@ -52,7 +52,7 @@ Status values:
 | 8     | Mobile decommission                     | DONE   | 2026-02-16 | 2026-02-16 |               | PASS     |
 | 9     | Polish + responsive + a11y + SEO        | DONE   | 2026-02-16 | 2026-02-16 |               | PASS     |
 | 10    | Tests + quality gates                   | DONE   | 2026-02-16 | 2026-02-16 |               | PASS     |
-| 11    | Release + rollout evidence              | DONE   | 2026-02-16 | 2026-02-16 | 2cbfa29       | PASS     |
+| 11    | Release + rollout evidence              | DONE   | 2026-02-16 | 2026-02-16 | 9d2e589       | PASS     |
 
 ---
 
@@ -138,7 +138,7 @@ Record command outputs in short form. Use PASS/FAIL only.
 | 2026-02-16 | 10    | `pnpm type-check`                                                          | PASS      | Monorepo clean                                |
 | 2026-02-16 | 10    | `pnpm test`                                                                | PASS      | 48 tests pass (monorepo-wide)                 |
 | 2026-02-16 | 10    | `pnpm build`                                                               | PASS      | All apps build successfully                   |
-| 2026-02-16 | 11    | `git rev-parse HEAD`                                                       | PASS      | Commit: 2cbfa29                               |
+| 2026-02-16 | 11    | `git rev-parse HEAD`                                                       | PASS      | Commit: 9d2e589                               |
 | 2026-02-16 | 11    | `pnpm -C frontend/apps/customer-portal build`                              | PASS      | Build clean                                   |
 | 2026-02-16 | 11    | Manual: Route Verification                                                 | PASS      | All routes present                            |
 | 2026-02-16 | 11    | Staging Validation                                                         | PASS      | See: 13-staging-validation.md                 |
